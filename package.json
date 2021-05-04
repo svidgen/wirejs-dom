@@ -1,0 +1,36 @@
+{
+  "name": "@svidgen/dom",
+  "version": "1.0.0",
+  "description": "Ultralite web component and DOM manipulation library.",
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "qunit tests/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svidgen/dom.git"
+  },
+  "keywords": [
+    "web",
+    "framework",
+    "dom"
+  ],
+  "author": "Jon Wire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/svidgen/dom/issues"
+  },
+  "homepage": "https://github.com/svidgen/dom#readme",
+  "devDependencies": {
+    "jest": "^26.6.3",
+    "jsdom": "^16.5.3",
+    "qunit": "^2.15.0"
+  },
+  "dependencies": {
+    "zen-observable": "^0.8.15"
+  }
+}
