@@ -206,7 +206,7 @@ QUnit.test("DomClass subscribes to generic observables, treating each messages l
 	assert.equal(c.greet, 'updated', "`greet` should be updated");
 });
 
-QUnit.test.only("Multiple DomClasses can subscribe to a generic observable", function(assert) {
+QUnit.test.skip("Multiple DomClasses can subscribe to a generic observable", function(assert) {
 	// const person = Observable.of("one", "two", "three");
 	//
 	let observer;
