@@ -13,6 +13,31 @@ QUnit.test("can mirror existing object properties", assert => {
 	assert.equal(target.a, 124);
 });
 
+QUnit.test("can mirror multiple properties", assert => {
+	const source = {a: 123, b: 456};
+	const target = {};
+
+	const mirror = reflect(source).onto(target);
+	source.a++;
+	source.b++;
+
+	assert.equal(source.a, 124);
+	assert.equal(source.b, 457);
+	assert.equal(target.a, 124);
+	assert.equal(target.b, 457);
+});
+
+QUnit.test("can auto-register target props not-yet-existent on source for mirroring", assert => {
+	const source = {};
+	const target = {a: 'default'};
+
+	const mirror = reflect(source).onto(target);
+	source.a = 'asdf';
+
+	assert.equal(source.a, 'asdf');
+	assert.equal(target.a, 'asdf');
+});
+
 QUnit.test("can mirror not-yet-existing properties when explicitly requested", assert => {
 	const source = {};
 	const target = {};
@@ -60,4 +85,48 @@ QUnit.test("can mirror functions to functions", assert => {
 	assert.equal(typeof source.a, 'function', "a() should still be intact as a function on the source");
 	assert.equal(typeof target.a, 'function', "a() should still be intact as a function on the target");
 	assert.equal(target._calledWith, 'abc');
+});
+
+QUnit.test("can mirror functions args to properties", assert => {
+	const source = {a: v => {}};
+	const target = {};
+
+	const mirror = reflect(source).onto(target);
+	source.a('abc', 'xyz');
+
+	assert.equal(typeof source.a, 'function', "source.a should still be a function");
+	assert.equal(typeof target.a, 'object', "target.b should be an object (array)");
+	assert.ok(target.a instanceof Array, "target.b should be an [args] array");
+	assert.equal(target.a.length, 2, "target.a length should match args length");
+	assert.equal(target.a[0], 'abc');
+	assert.equal(target.a[1], 'xyz');
+});
+
+QUnit.test("provides a shatterable mirror", assert => {
+	const source = {};
+	const target = {a: 'default', b: v => { target._b = v; } };
+
+	const mirror = reflect(source).onto(target);
+	source.a = 'a value';
+	source.b = 'b value';
+
+	assert.equal(target.a, 'a value');
+	assert.equal(target._b, 'b value');
+
+	mirror.shatter();
+	source.a = 'new a value';
+	source.b = 'new b value';
+
+	assert.equal(target.a, 'a value');
+	assert.equal(target._b, 'b value');
+});
+
+// not yet implemented
+QUnit.test.skip("gives target default values from source", assert => {
+	const source = {a: 'default a'};
+	const target = {};
+
+	const mirror = reflect(source).onto(target);
+
+	assert.equal(target.a, 'default a');
 });
