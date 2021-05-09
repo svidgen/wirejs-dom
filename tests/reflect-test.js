@@ -47,7 +47,17 @@ QUnit.test("can mirror properties to functions", assert => {
 
 	assert.equal(source.a, 'abc');
 	assert.equal(target._calledWith, 'abc');
-	assert.ok(typeof target.a === 'function', "the monitoring function should not be tampered with");
+	assert.equal(typeof target.a, 'function', "the monitoring function should not be tampered with");
 });
 
+QUnit.test("can mirror functions to functions", assert => {
+	const source = { a: v => {} };
+	const target = { a: function(v) { this._calledWith = v; } };
 
+	const mirror = reflect(source).onto(target);
+	source.a('abc');
+
+	assert.equal(typeof source.a, 'function', "a() should still be intact as a function on the source");
+	assert.equal(typeof target.a, 'function', "a() should still be intact as a function on the target");
+	assert.equal(target._calledWith, 'abc');
+});
