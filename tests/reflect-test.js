@@ -122,7 +122,7 @@ QUnit.test("provides a shatterable mirror", assert => {
 });
 
 // not yet implemented
-QUnit.test.skip("gives target default values from source", assert => {
+QUnit.test("gives target default values from source", assert => {
 	const source = {a: 'default a'};
 	const target = {};
 
