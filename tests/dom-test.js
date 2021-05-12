@@ -12,7 +12,7 @@ document.body.appendChild(fixture);
 const Observable = require('zen-observable');
 
 const {
-    DomClass, bless,
+    DomClass, bless, reflect,
     isa, getTypeId, setType, registerType,
     getNodes
 } = require('../lib/index');
@@ -191,22 +191,20 @@ QUnit.test("DomClass properties resolve promises", async function(assert) {
 	assert.ok(c.innerHTML.match(/hello/), "new `world` value is present in markup");
 });
 
-QUnit.test("DomClass subscribes to generic observables, treating each messages like replacement content", async function(assert) {
+QUnit.test.skip("DomClass mirrors reflections", async function(assert) {
 	const C = DomClass("<t:c><span data-id='greet'></span></t:c>");
 	const c = new C();
 
-	let observer;
-	const person = new Observable(o => { observer = o; });
-	c.greet = person;
+	const person = ['initial'];
+	c.greet = reflect(person);
 
-	observer.next('initial');
 	assert.equal(c.greet, 'initial', "`greet` should be initial");
 
-	observer.next('updated');
+	person[0] = 'updated';
 	assert.equal(c.greet, 'updated', "`greet` should be updated");
 });
 
-QUnit.test.skip("Multiple DomClasses can subscribe to a generic observable", function(assert) {
+QUnit.test("Multiple DomClasses can subscribe to a generic observable", function(assert) {
 	// const person = Observable.of("one", "two", "three");
 	//
 	let observer;

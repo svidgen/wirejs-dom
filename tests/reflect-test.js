@@ -121,7 +121,6 @@ QUnit.test("provides a shatterable mirror", assert => {
 	assert.equal(target._b, 'b value');
 });
 
-// not yet implemented
 QUnit.test("gives target default values from source", assert => {
 	const source = {a: 'default a'};
 	const target = {};
@@ -129,4 +128,86 @@ QUnit.test("gives target default values from source", assert => {
 	const mirror = reflect(source).onto(target);
 
 	assert.equal(target.a, 'default a');
+});
+
+QUnit.test("initializes array mirrors", assert => {
+	const source = [1,2,3];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
+});
+
+QUnit.test("mirrors array push", assert => {
+	const source = [];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	source.push(123);
+
+	assert.equal(target[0], 123);
+});
+
+QUnit.test("mirrors array pop", assert => {
+	const source = [1,2,3,4];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	const popped = source.pop();
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
+	assert.equal(popped, 4);
+});
+
+QUnit.test("mirrors array unshift", assert => {
+	const source = [2,3];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	source.unshift(1);
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
+});
+
+QUnit.test("mirrors array shift", assert => {
+	const source = [0,1,2,3];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	source.shift();
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
+});
+
+QUnit.test("mirrors array splice", assert => {
+	const source = [1,1,2,3];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	source.splice(1,1);
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
+});
+
+QUnit.test("mirrors array splice with replacement", assert => {
+	const source = [1,3];
+	const target = [];
+
+	const mirror = reflect(source).onto(target);
+	source.splice(1,0,2);
+
+	const expected = JSON.stringify([1,2,3]);
+	assert.equal(JSON.stringify(source), expected);
+	assert.equal(JSON.stringify(target), expected);
 });
