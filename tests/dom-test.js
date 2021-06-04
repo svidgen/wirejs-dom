@@ -2,13 +2,19 @@ const QUnit = require('qunit');
 
 const Observable = require('zen-observable');
 
+let fixture = document.createElement('div');
+document.body.appendChild(fixture);
+
 const {
     DomClass, bless, reflect,
     isa, getTypeId, setType, registerType,
     getNodes
 } = require('../lib/index');
 
-QUnit.testStart(() => fixture.innerHTML = '');
+QUnit.testStart(() => {
+	fixture.innerHTML = '';
+	document.body.appendChild(fixture);
+});
 
 QUnit.module("tg-dom");
 
