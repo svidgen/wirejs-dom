@@ -8,7 +8,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "qunit tests/*"
+    "test": "qunit tests/cli.js",
+    "build:watch": "rimraf www/index.js && webpack --mode development --progress --watch -o www --entry ./lib/index.js --entry ./tests/www.js",
+    "serve": "live-server ./www",
+    "test:web": "concurrently -k -p \"[{name}]\" -n \"Build,Serve\" -c \"cyan.bold,green.bold\" \"npm run build:watch\" \"npm run serve\""
   },
   "repository": {
     "type": "git",
@@ -26,9 +29,14 @@
   },
   "homepage": "https://github.com/svidgen/dom#readme",
   "devDependencies": {
+    "concurrently": "^6.2.0",
+    "http-server": "^0.12.3",
     "jest": "^26.6.3",
     "jsdom": "^16.5.3",
-    "qunit": "^2.15.0"
+    "live-server": "^1.2.1",
+    "qunit": "^2.15.0",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.0"
   },
   "dependencies": {
     "zen-observable": "^0.8.15"
