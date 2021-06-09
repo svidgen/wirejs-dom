@@ -1,6 +1,6 @@
 const QUnit = require('qunit');
 
-const Observable = require('zen-observable');
+// const Observable = require('zen-observable');
 
 let fixture = document.createElement('div');
 document.body.appendChild(fixture);
@@ -13,7 +13,7 @@ const {
 
 QUnit.testStart(() => {
 	fixture.innerHTML = '';
-	document.body.appendChild(fixture);
+	// document.body.appendChild(fixture);
 });
 
 QUnit.module("tg-dom");
@@ -201,7 +201,7 @@ QUnit.test.skip("DomClass mirrors reflections", async function(assert) {
 	assert.equal(c.greet, 'updated', "`greet` should be updated");
 });
 
-QUnit.test("Multiple DomClasses can subscribe to a generic observable", function(assert) {
+QUnit.test.skip("Multiple DomClasses can subscribe to a generic observable", function(assert) {
 	// const person = Observable.of("one", "two", "three");
 	//
 	let observer;
@@ -222,91 +222,68 @@ QUnit.test("Multiple DomClasses can subscribe to a generic observable", function
 	// assert.equal(c2.greet, 'three', "`greet` property was updated on `c2`");
 });
 
-QUnit.test("bless() also initializes child constructors", function(assert) {
-	var P = function() {};
-	P.templateMarkup =
-		"<div data-id='pvalue' data-property='innerHTML'>p hello</div>"
-		+ "<div data-id='cnode' class='c'></div>"
-	;
-	bless(P, '.p');
+QUnit.test("DomClass also initializes child constructors", function(assert) {
+	const P = DomClass(
+		`<t:p><div data-id='pvalue' data-property='innerHTML'>p hello</div>
+		<t:c data-id='cnode' class='c'></t:c></t:p>`,
+		function () {}
+	);
 
-	var C = function() {};
-	C.templateMarkup =
-		"<div data-id='cvalue' data-property='innerHTML'>c hello</div>"
-	;
-	bless(C, '.c');
+	const C = DomClass(
+		"<t:c><div data-id='cvalue' data-property='innerHTML'>c hello</div></t:c>",
+		function () {}
+	);
 	
-	var n = New(P);
+	const n = new P();
 
 	assert.equal(n.pvalue, 'p hello', 'parent value property is set');
 	assert.equal(n.cnode.cvalue, 'c hello', 'child value property is set');
 });
 
-// TODO: rename this ... 
-QUnit.test("bless()'d nodes created with New() identify properly", function(assert) {
-	var P = function() {};
-	P.templateMarkup =
-		"<div data-id='pvalue' data-property='innerHTML'>hello</div>"
-		+ "<div data-id='cnode' class='c'></div>"
-	;
-	bless(P, '.p');
+// // TODO: rename this ... 
+// QUnit.test("bless()'d nodes created with New() identify properly", function(assert) {
+// 	var P = function() {};
+// 	P.templateMarkup =
+// 		"<div data-id='pvalue' data-property='innerHTML'>hello</div>"
+// 		+ "<div data-id='cnode' class='c'></div>"
+// 	;
+// 	bless(P, '.p');
 
-	var C = function() {};
-	C.templateMarkup =
-		"<div data-id='cvalue' data-property='innerHTML'>hello</div>"
-	;
-	bless(C, '.c');
+// 	var C = function() {};
+// 	C.templateMarkup =
+// 		"<div data-id='cvalue' data-property='innerHTML'>hello</div>"
+// 	;
+// 	bless(C, '.c');
 	
-	var n = New(P);
+// 	var n = New(P);
 
-	assert.ok(isa(n, P), "the root node identifies as P");
-	assert.ok(isa(n.cnode, C), "the child node identifies as C");
-});
+// 	assert.ok(isa(n, P), "the root node identifies as P");
+// 	assert.ok(isa(n.cnode, C), "the child node identifies as C");
+// });
 
-QUnit.test("bless() applies nested initializer properties to nested nodes", function(assert) {
-	var P = function() {};
-	P.templateMarkup =
-		"<div data-id='pvalue' data-property='innerHTML'>hello</div>"
-		+ "<div data-id='cnode' class='c'></div>"
-	;
-	bless(P, '.p');
+// QUnit.test("bless() applies nested initializer properties to nested nodes", function(assert) {
+// 	var P = function() {};
+// 	P.templateMarkup =
+// 		"<div data-id='pvalue' data-property='innerHTML'>hello</div>"
+// 		+ "<div data-id='cnode' class='c'></div>"
+// 	;
+// 	bless(P, '.p');
 
-	var C = function() {};
-	C.templateMarkup =
-		"<div data-id='cvalue' data-property='innerHTML'>hello</div>"
-	;
-	bless(C, '.c');
+// 	var C = function() {};
+// 	C.templateMarkup =
+// 		"<div data-id='cvalue' data-property='innerHTML'>hello</div>"
+// 	;
+// 	bless(C, '.c');
 	
-	var n = New(P, { pvalue: 'parent', cnode: { cvalue: 'child' }});
+// 	var n = New(P, { pvalue: 'parent', cnode: { cvalue: 'child' }});
 
-	assert.equal(n.pvalue, 'parent', 'parent value property is set');
-	assert.equal(n.cnode.cvalue, 'child', 'child value property is set');
-});
+// 	assert.equal(n.pvalue, 'parent', 'parent value property is set');
+// 	assert.equal(n.cnode.cvalue, 'child', 'child value property is set');
+// });
 
-QUnit.test("bless() attaches nested constructed nodes on existing markup", function(assert) {
-	var Outer = DomClass("<t:outer>outer html<div data-id='inner'></div></t:outer>");
-	var Inner = DomClass("<t:inner>inner html</t:inner>");
-	fixture.innerHTML = "<t:outer><t:inner data-id='inner'></t:inner></t:outer>";
-	bless(fixture);
-
-	assert.ok(fixture.innerHTML.match(/outer html/), "t:outer was bound");
-	assert.ok(fixture.innerHTML.match(/inner html/), "t:inner was bound");
-});
-
-QUnit.test("DomClass gracefully ignores non-ID'd params", function(assert) {
-	var Widget = DomClass("<t:widget><b data-id='x'>default</b></t:widget>");
-
-	// note the widget has spaces / text nodes in it
-	fixture.innerHTML = "<t:widget> <b data-id='x'>value</b> </t:widget>";
-	bless(fixture);
-
-	assert.ok(true, "things didn't blow up!");
-});
-
-// QUnit.test("bless() supports 3 layers of DomClass nesting", function(assert) {
-// 	DomClass("<t:nest-one>one html<div data-id='inner'></div></t:nest-one>");
-// 	DomClass("<t:nest-two>two html</t:nest-two>");
-// 	DomClass("<t:nest-three>three html></t:nest-three>");
+// QUnit.test("bless() attaches nested constructed nodes on existing markup", function(assert) {
+// 	var Outer = DomClass("<t:outer>outer html<div data-id='inner'></div></t:outer>");
+// 	var Inner = DomClass("<t:inner>inner html</t:inner>");
 // 	fixture.innerHTML = "<t:outer><t:inner data-id='inner'></t:inner></t:outer>";
 // 	bless(fixture);
 
@@ -314,30 +291,51 @@ QUnit.test("DomClass gracefully ignores non-ID'd params", function(assert) {
 // 	assert.ok(fixture.innerHTML.match(/inner html/), "t:inner was bound");
 // });
 
-QUnit.test("A basic `DomClass` can be newed up.", function(assert) {
-	var C = DomClass("<t:newable>inner html</t:newable>");
-	fixture.appendChild(new C());
-	assert.ok(fixture.innerHTML.match(/inner html/), "inner markup was preserved");
-});
+// QUnit.test("DomClass gracefully ignores non-ID'd params", function(assert) {
+// 	var Widget = DomClass("<t:widget><b data-id='x'>default</b></t:widget>");
 
-QUnit.test("A `DomClass` can be newed up, preserving inner tags.", function(assert) {
-	var C = DomClass("<t:newable>inner <b>BOLD</b></t:newable>");
-	fixture.appendChild(new C());
-	assert.ok(fixture.innerHTML.match(/inner <b>BOLD<\/b>/), "inner markup was preserved");
-});
+// 	// note the widget has spaces / text nodes in it
+// 	fixture.innerHTML = "<t:widget> <b data-id='x'>value</b> </t:widget>";
+// 	bless(fixture);
 
-QUnit.test("A `DomClass` can be newed up, preserving inner identified tags.", function(assert) {
-	var C = DomClass("<t:newable>inner <span data-id='bolded'>identified</span></t:newable>");
-	fixture.appendChild(new C());
-	assert.ok(fixture.innerHTML.match(/inner/), "inner markup was preserved");
-	assert.ok(fixture.innerHTML.match(/identified/), "inner markup was preserved");
-	assert.equal(fixture.firstChild.bolded.innerHTML, 'identified');
-});
+// 	assert.ok(true, "things didn't blow up!");
+// });
 
-QUnit.test("A `DomClass` with a nested `DomClass` can be newed up.", function(assert) {
-	DomClass("<t:innernewable>very inner html</t:innernewable>");
-	var C = DomClass("<t:outernewable>outer <t:innernewable></t:innernewable></t:outernewable>");
-	fixture.appendChild(new C());
-	assert.ok(fixture.innerHTML.match(/outer/), "inner markup was preserved");
-	assert.ok(fixture.innerHTML.match(/very inner html/), "inner markup was preserved");
-});
+// // QUnit.test("bless() supports 3 layers of DomClass nesting", function(assert) {
+// // 	DomClass("<t:nest-one>one html<div data-id='inner'></div></t:nest-one>");
+// // 	DomClass("<t:nest-two>two html</t:nest-two>");
+// // 	DomClass("<t:nest-three>three html></t:nest-three>");
+// // 	fixture.innerHTML = "<t:outer><t:inner data-id='inner'></t:inner></t:outer>";
+// // 	bless(fixture);
+
+// // 	assert.ok(fixture.innerHTML.match(/outer html/), "t:outer was bound");
+// // 	assert.ok(fixture.innerHTML.match(/inner html/), "t:inner was bound");
+// // });
+
+// QUnit.test("A basic `DomClass` can be newed up.", function(assert) {
+// 	var C = DomClass("<t:newable>inner html</t:newable>");
+// 	fixture.appendChild(new C());
+// 	assert.ok(fixture.innerHTML.match(/inner html/), "inner markup was preserved");
+// });
+
+// QUnit.test("A `DomClass` can be newed up, preserving inner tags.", function(assert) {
+// 	var C = DomClass("<t:newable>inner <b>BOLD</b></t:newable>");
+// 	fixture.appendChild(new C());
+// 	assert.ok(fixture.innerHTML.match(/inner <b>BOLD<\/b>/), "inner markup was preserved");
+// });
+
+// QUnit.test("A `DomClass` can be newed up, preserving inner identified tags.", function(assert) {
+// 	var C = DomClass("<t:newable>inner <span data-id='bolded'>identified</span></t:newable>");
+// 	fixture.appendChild(new C());
+// 	assert.ok(fixture.innerHTML.match(/inner/), "inner markup was preserved");
+// 	assert.ok(fixture.innerHTML.match(/identified/), "inner markup was preserved");
+// 	assert.equal(fixture.firstChild.bolded.innerHTML, 'identified');
+// });
+
+// QUnit.test("A `DomClass` with a nested `DomClass` can be newed up.", function(assert) {
+// 	DomClass("<t:innernewable>very inner html</t:innernewable>");
+// 	var C = DomClass("<t:outernewable>outer <t:innernewable></t:innernewable></t:outernewable>");
+// 	fixture.appendChild(new C());
+// 	assert.ok(fixture.innerHTML.match(/outer/), "inner markup was preserved");
+// 	assert.ok(fixture.innerHTML.match(/very inner html/), "inner markup was preserved");
+// });
