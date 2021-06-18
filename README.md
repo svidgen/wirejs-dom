@@ -1,5 +1,3 @@
-# tg-dom
-
 A bare bones component style JavaScript framework.
 
 ## Install it
