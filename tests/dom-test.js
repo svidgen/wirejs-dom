@@ -66,7 +66,6 @@ QUnit.test("setType() and isa() mark and recognize unnamed functions", function(
 	assert.ok(isa(o, fn), "object WITH type is identified as HAVING the type");
 });
 
-
 QUnit.test("DomClass(t, c) uses template to build new C()", function(assert) {
 	const C = DomClass('<t:c>Wee!</t:c>', function() {});
 	const n = new C();
@@ -101,6 +100,32 @@ QUnit.test("Direct assignment to blessed node properties updates the DOM", funct
 
 	var spans = getNodes(n, 'span');
 	assert.strictEqual(spans[0], galaxy, "the inserted node IS the created and assigned node");
+});
+
+QUnit.test("DomClass calls init() after instantiation", function(assert) {
+	const C = DomClass("<t:c></t:c>", function() {
+		this.initialized = false;
+		this.init = function() {
+			this.initialized = true;
+		};
+	});
+
+	let c = new C();
+	assert.ok(c.initialized);
+});
+
+QUnit.test("DomClass calls init() after hydration", function(assert) {
+	fixture.innerHTML = "<t:c>... yeah.</t:c>";
+
+	const C = DomClass("<t:c></t:c>", function() {
+		this.initialized = false;
+		this.init = function() {
+			this.initialized = true;
+		};
+	});
+
+	const c = fixture.firstChild;
+	assert.ok(c.initialized);
 });
 
 QUnit.test("DomClass attaches to existing matching DOM node and attaches identified nodes under target node `this`", function(assert) {
