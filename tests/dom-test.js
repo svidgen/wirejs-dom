@@ -72,6 +72,15 @@ QUnit.test("DomClass(t, c) uses template to build new C()", function(assert) {
 	assert.ok(n.innerHTML == 'Wee!', "innerHTML matched the templateMarkup");
 });
 
+QUnit.test("DomClass ignores whitespace around template", function(assert) {
+	const body = "did it ignore whitespace?";
+	const C = DomClass(`
+		<t:c>${body}</t:c>
+	`);
+	const n = new C();
+	assert.ok(n.innerHTML == body, "class is expected to render only the template node <t:c>...</t:c>");
+});
+
 QUnit.test("DomClass() attaches pre-existing nodes as properties of `this` in constructors", function(assert) {
 	const template = "<t:c>Welcome <span data-id='name'>Person</span>!</t:c>";
 	const C = DomClass(template, function() {
