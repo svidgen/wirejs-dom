@@ -318,6 +318,30 @@ QUnit.test("DomClass applies nested initializer properties to nested nodes", fun
 	assert.equal(n.cnode.cvalue, 'child', 'child value property is set');
 });
 
+QUnit.test("DomClass applies nested child collection initializers", function (assert) {
+	const P = new DomClass(`<t:p>
+		<div data-id='child_values' data-collection='t:c'></div>
+	</t:p>`);
+
+	const C = new DomClass(`<t:c>
+		<span data-id="value" data-property='innerHTML'></span>
+	</t:c>`);
+
+	const n = new P({child_values: [
+		{value: 'a'},
+		{value: 'b'},
+		{value: 'c'},
+	]});
+
+	assert.equal(n.child_values[0].value, 'a');
+	assert.equal(n.child_values[1].value, 'b');
+	assert.equal(n.child_values[2].value, 'c');
+
+	for (const child of n.child_values) {
+		assert.ok(child.innerHTML.includes(`span data-id="value"`));
+	}
+});
+
 QUnit.test("DomClass attaches nested constructed nodes on existing markup", function(assert) {
 	const Outer = DomClass("<t:outer>outer html<div data-id='inner'></div></t:outer>");
 	const Inner = DomClass("<t:inner>inner html</t:inner>");
