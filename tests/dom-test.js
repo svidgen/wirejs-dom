@@ -205,8 +205,138 @@ QUnit.test("DomClass accessors are serializeable with JSON.stringify()", functio
 	const C = DomClass("<t:c>Hello <span data-id='world' data-property='innerHTML'>World</span>!</t:c>");
 	var c = new C();
 	var serialization = JSON.stringify(c);
-	eval("var c2 = " + serialization);
-	assert.equal(c2.world, "World", "the rebuilt-from-json object contains .world='World'");
+	var deserialized = JSON.parse(serialization);
+
+	assert.deepEqual(
+		deserialized,
+		{ world: "World" },
+		"the JSON contains the 'world' property value and ONLY that property"
+	);
+});
+
+QUnit.test("DomClass serialization can be nested to singleton children", function (assert) {
+	const Parent = DomClass(`<t:parent>
+		Hello.
+		<t:child data-id='kid'></t:child>
+	</t:parent>`);
+
+	const Child = DomClass(`<t:child>
+		<div data-id='hello' data-property='innerHTML'>my child</div>
+	</t:child>`);
+
+	const node = new Parent();
+	var serialization = JSON.stringify(node);
+	var deserialized = JSON.parse(serialization);
+
+	assert.equal(typeof node.kid.toJSON, 'function');
+	assert.deepEqual(
+		deserialized,
+		{ kid: { hello: "my child" } },
+		"The full tree should be safely serialized."
+	);
+});
+
+QUnit.test("DomClass serialization can serialize nested collections, children added after init", function (assert) {
+	const Parent = DomClass(`<t:parent>
+		Hello.
+		<div data-id='kids' data-collection='t:child'></t:div>
+	</t:parent>`);
+
+	const Child = DomClass(`<t:child>
+		<div data-id='hello' data-property='innerHTML'>my child</div>
+	</t:child>`);
+
+	const node = new Parent();
+	node.kids = [
+		{hello: "franky"},
+		{hello: "billy"},
+		{hello: "bobby"},
+	];
+
+	var serialization = JSON.stringify(node);
+	var deserialized = JSON.parse(serialization);
+
+	assert.deepEqual(
+		deserialized,
+		{
+			kids: [
+				{hello: "franky"},
+				{hello: "billy"},
+				{hello: "bobby"},
+			].map(v => ({...v, class:''})) // `className`... not sure if dev will want this stripped
+		},
+		"The full tree should be safely serialized."
+	);
+});
+
+QUnit.test("DomClass serialization can serialize nested collections, initialized with children", function (assert) {
+	const Parent = DomClass(`<t:parent>
+		Hello.
+		<div data-id='kids' data-collection='t:child'></t:div>
+	</t:parent>`);
+
+	const Child = DomClass(`<t:child>
+		<div data-id='hello' data-property='innerHTML'>my child</div>
+	</t:child>`);
+
+	const node = new Parent({
+		kids: [
+			{hello: "franky"},
+			{hello: "billy"},
+			{hello: "bobby"},
+		]
+	});
+
+	var serialization = JSON.stringify(node);
+	var deserialized = JSON.parse(serialization);
+
+	assert.deepEqual(
+		deserialized,
+		{
+			kids: [
+				{hello: "franky"},
+				{hello: "billy"},
+				{hello: "bobby"},
+			].map(v => ({...v, class:''})) // `className`... not sure if dev will want this stripped
+		},
+		"The full tree should be safely serialized."
+	);
+});
+
+QUnit.test("DomClass serialization can seed re-instantiation", function (assert) {
+	const Parent = DomClass(`<t:parent>
+		Hello.
+		<div data-id='kids' data-collection='t:child'></t:div>
+	</t:parent>`);
+
+	const Child = DomClass(`<t:child>
+		<div data-id='hello' data-property='innerHTML'>my child</div>
+	</t:child>`);
+
+	const base = new Parent({
+		kids: [
+			{hello: "franky"},
+			{hello: "billy"},
+			{hello: "bobby"},
+		]
+	});
+
+	const node = new Parent(JSON.parse(JSON.stringify(base)));
+
+	var serialization = JSON.stringify(node);
+	var deserialized = JSON.parse(serialization);
+
+	assert.deepEqual(
+		deserialized,
+		{
+			kids: [
+				{hello: "franky"},
+				{hello: "billy"},
+				{hello: "bobby"},
+			].map(v => ({...v, class:''})) // `className`... not sure if dev will want this stripped
+		},
+		"The full tree should be safely serialized (again)."
+	);
 });
 
 QUnit.test("DomClass properties resolve promises", async function(assert) {
@@ -333,6 +463,7 @@ QUnit.test("DomClass applies nested child collection initializers", function (as
 		{value: 'c'},
 	]});
 
+	assert.equal(n.child_values.length, 3);
 	assert.equal(n.child_values[0].value, 'a');
 	assert.equal(n.child_values[1].value, 'b');
 	assert.equal(n.child_values[2].value, 'c');
