@@ -471,6 +471,17 @@ QUnit.test("DomClass applies nested child collection initializers", function (as
 	for (const child of n.child_values) {
 		assert.ok(child.innerHTML.includes(`span data-id="value"`));
 	}
+
+	assert.equal(
+		n.innerHTML.trim().replace(/\s+/g, ' '),
+		`<div data-id="child_values" data-collection="t:c"><t:c class="">
+			<span data-id="value" data-property="innerHTML">a</span>
+		</t:c><t:c class="">
+			<span data-id="value" data-property="innerHTML">b</span>
+		</t:c><t:c class="">
+			<span data-id="value" data-property="innerHTML">c</span>
+		</t:c></div>`.replace(/\s+/g, ' ')
+	)
 });
 
 QUnit.test("DomClass attaches nested constructed nodes on existing markup", function(assert) {
