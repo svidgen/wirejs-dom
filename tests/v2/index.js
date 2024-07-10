@@ -10,9 +10,10 @@ QUnit.module("wirejs-v2");
 
 QUnit.test("", assert => {
     const x = html`<div ${id('root')}>
-        ${text('someid')}
+        something
+        <button onclick=${handle(() => handleClick())}>clicky click</button>
     </div>`;
 
     // type isn't being picked up correctly here...
-    x.data;
+    x.data.root;
 });

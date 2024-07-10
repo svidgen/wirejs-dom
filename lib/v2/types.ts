@@ -4,7 +4,7 @@ export type Identified<ID extends string, Target> = {
 };
 
 export type ElementContext = {
-	container: Element;
+	container: HTMLElement;
 };
 
 export type ElementBuilder<ID extends string, Target> = {
@@ -47,3 +47,15 @@ export type ElementBuildersToRecordTuple<T> = {
 export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
 	? KindaPretty<UnionToIntersection<ElementBuildersToRecordTuple<T>[number]>>
 	: never;
+
+export type html = <T extends ReadonlyArray<any> = []>(
+	raw: ReadonlyArray<string>,
+	...builders: T
+) => HTMLElement & { data: ElementBuildersToRecords<T> };
+
+export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
+
+export type text = <ID extends string>(id: ID, body: text) => ElementBuilder<ID, HTMLElement>;
+
+export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
+
