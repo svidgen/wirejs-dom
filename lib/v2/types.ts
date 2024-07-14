@@ -55,7 +55,7 @@ export type html = <T extends ReadonlyArray<any> = []>(
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
-export type text = <ID extends string>(id: ID, body: text) => ElementBuilder<ID, HTMLElement>;
+export type text = <ID extends string>(id: ID, body: string) => ElementBuilder<ID, string>;
 
 export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 

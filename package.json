@@ -8,10 +8,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "qunit tests/cli.js",
-    "build:watch": "rimraf www/index.js && webpack --mode development --progress --watch -o www --entry ./lib/index.js --entry ./tests/www.js",
+    "build": "wirejs-scripts build",
+    "start": "wirejs-scripts start",
+    "nottest": "qunit tests/cli.js",
+    "build:watch": "rimraf www/index.js && webpack --mode development --progress --watch -o www --entry ./lib/index.js --entry ./lib/v2/index.js --entry ./tests/www.js",
     "serve": "live-server ./www",
-    "test:web": "concurrently -k -p \"[{name}]\" -n \"Build,Serve\" -c \"cyan.bold,green.bold\" \"npm run build:watch\" \"npm run serve\""
+    "test:web": "concurrently -k -p \"[{name}]\" -n \"Build,Serve\" -c \"cyan.bold,green.bold\" \"npm run build:watch\" \"npm run serve\"",
+    "notstart": "npm run test:web"
   },
   "repository": {
     "type": "git",
@@ -29,13 +32,11 @@
   },
   "homepage": "https://github.com/svidgen/dom#readme",
   "devDependencies": {
-    "concurrently": "^6.2.0",
     "jsdom": "^16.5.3",
-    "live-server": "^1.2.1",
-    "qunit": "^2.15.0",
-    "rimraf": "^3.0.2",
-    "webpack": "^5.38.1",
-    "webpack-cli": "^4.7.0"
+    "qunit": "^2.21.0",
+    "rimraf": "^3.0.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "wirejs-scripts": "^2.0.5"
+  }
 }

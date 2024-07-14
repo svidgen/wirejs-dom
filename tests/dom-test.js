@@ -16,7 +16,7 @@ QUnit.testStart(() => {
 	fixture.innerHTML = '';
 });
 
-QUnit.module("tg-dom");
+QUnit.module("wirejs-v1");
 
 QUnit.test("isa() identifies core JS types", function(assert) {
 	var und;
