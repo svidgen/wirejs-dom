@@ -1,3 +1,7 @@
+export type Primitive = string | number | boolean;
+
+export type AttributeValue = Primitive | ((...args: any) => any) | null | undefined;
+
 export type Identified<ID extends string, Target> = {
 	id: ID;
 	target: Target;
@@ -55,7 +59,13 @@ export type html = <T extends ReadonlyArray<any> = []>(
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
-export type text = <ID extends string>(id: ID, body: string) => ElementBuilder<ID, string>;
+export type text = <ID extends string>(id: ID, body?: string) => ElementBuilder<ID, string>;
 
 export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 
+export type attribute = <
+	ID extends string
+>(
+	id: ID,
+	value?: AttributeValue
+) => ElementBuilder<ID, AttributeValue>;

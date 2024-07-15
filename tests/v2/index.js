@@ -1,4 +1,4 @@
-import { html, id, text, handle } from '../../lib/v2';
+import { html, id, span, handle, attribute } from '../../lib/v2';
 const QUnit = require('qunit');
 
 QUnit.testStart(() => {
@@ -74,8 +74,8 @@ QUnit.test("html`` extracted node is mutable", assert => {
     assert.equal(data.middle.innerHTML, 'changed', 'data has changed as expected');
 });
 
-QUnit.test("text`` injects a span with a data-id", assert => {
-    const t = html`<div>before ${text('placeholder')} after</div>`;
+QUnit.test("span`` injects a span with a data-id", assert => {
+    const t = html`<div>before ${span('placeholder')} after</div>`;
 
     console.log(t.data);
     
@@ -86,8 +86,8 @@ QUnit.test("text`` injects a span with a data-id", assert => {
     );
 });
 
-QUnit.test("text`` can receive default/init text", assert => {
-    const t = html`<div>before ${text('placeholder', 'some text')} after</div>`;
+QUnit.test("span`` can receive default/init text", assert => {
+    const t = html`<div>before ${span('placeholder', 'some text')} after</div>`;
 
     assert.equal(
         t.innerHTML,
@@ -96,8 +96,8 @@ QUnit.test("text`` can receive default/init text", assert => {
     );
 });
 
-QUnit.test("text`` adds a data getter to its innerHTML", assert => {
-    const { data } = html`<div>before ${text('placeholder', 'some inner html')} after</div>`;
+QUnit.test("span`` adds a data getter to its innerHTML", assert => {
+    const { data } = html`<div>before ${span('placeholder', 'some inner html')} after</div>`;
 
     assert.equal(
         data.placeholder,
@@ -106,8 +106,8 @@ QUnit.test("text`` adds a data getter to its innerHTML", assert => {
     );
 });
 
-QUnit.test("text`` adds a data setter to its innerHTML", assert => {
-    const t = html`<div>before ${text('placeholder')} after</div>`;
+QUnit.test("span`` adds a data setter to its innerHTML", assert => {
+    const t = html`<div>before ${span('placeholder')} after</div>`;
     t.data.placeholder = 'added text';
 
     assert.equal(
@@ -119,6 +119,41 @@ QUnit.test("text`` adds a data setter to its innerHTML", assert => {
         t.data.placeholder,
         'added text',
         'the new span text reads as expected'
+    );
+});
+
+QUnit.test("attribute`` can extract a node attribute", assert => {
+    const { data } = html`<div>
+        before
+        <div
+            ${id('middle')}
+            title=${attribute('middleTitle', 'default value')}
+        >middle</div>
+        after
+    </div>`;
+
+    assert.equal(
+        data.middle.getAttribute('title'),
+        'default value',
+        "attribute is created with default value"
+    )
+    assert.equal(
+        data.middleTitle,
+        'default value',
+        "extracted data property reads the attribute"
+    );
+
+    data.middleTitle = 'new title';
+
+    assert.equal(
+        data.middle.getAttribute('title'),
+        'new title',
+        "attribute updates are reflected in the DOM"
+    )
+    assert.equal(
+        data.middleTitle,
+        'new title',
+        "attribute updates are reflected in the getter"
     );
 });
 
