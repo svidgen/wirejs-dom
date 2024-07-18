@@ -1,6 +1,4 @@
-const QUnit = require('qunit');
-QUnit.start();
+import Qunit from 'qunit';
+import './index.js';
 
-// global.fixture = document.getElementById('qunit-fixture');
-
-require('./index.js');
+Qunit.start();

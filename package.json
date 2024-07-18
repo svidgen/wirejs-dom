@@ -3,6 +3,7 @@
   "version": "1.0.7",
   "description": "Ultralite web component and DOM manipulation library.",
   "main": "./lib/index.js",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "tests"
@@ -10,11 +11,7 @@
   "scripts": {
     "build": "wirejs-scripts build",
     "start": "wirejs-scripts start",
-    "nottest": "qunit tests/cli.js",
-    "build:watch": "rimraf www/index.js && webpack --mode development --progress --watch -o www --entry ./lib/index.js --entry ./lib/v2/index.js --entry ./tests/www.js",
-    "serve": "live-server ./www",
-    "test:web": "concurrently -k -p \"[{name}]\" -n \"Build,Serve\" -c \"cyan.bold,green.bold\" \"npm run build:watch\" \"npm run serve\"",
-    "notstart": "npm run test:web"
+    "test": "qunit tests/cli.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +29,7 @@
   },
   "homepage": "https://github.com/svidgen/dom#readme",
   "devDependencies": {
-    "jsdom": "^16.5.3",
+    "jsdom": "^21.1.0",
     "qunit": "^2.21.0",
     "rimraf": "^3.0.2"
   },

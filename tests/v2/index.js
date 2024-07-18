@@ -1,8 +1,10 @@
-import { html, id, span, handle, attribute } from '../../lib/v2';
-const QUnit = require('qunit');
+import { html, id, span, handle, attribute } from '../../lib/v2/index.js';
+import QUnit from 'qunit';
 
-QUnit.testStart(() => {
-	const fixture = document.createElement('div');
+let fixture = document.createElement('div');
+document.body.appendChild(fixture);
+
+QUnit.testDone(() => {
     fixture.innerHTML = '';
 });
 
@@ -77,8 +79,6 @@ QUnit.test("html`` extracted node is mutable", assert => {
 QUnit.test("span`` injects a span with a data-id", assert => {
     const t = html`<div>before ${span('placeholder')} after</div>`;
 
-    console.log(t.data);
-    
     assert.equal(
         t.innerHTML,
         'before <span data-id="placeholder"></span> after',

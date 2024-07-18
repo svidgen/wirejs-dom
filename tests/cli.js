@@ -1,11 +1,5 @@
-const { JSDOM } = require('jsdom');
-const DOM = new JSDOM('<!doctype html><html><body></body></html>');
-global.window = DOM.window
-global.document = window.document;
-global.Element = window.Element;
-global.Node = window.Node;
-global.NodeList = window.NodeList;
-global.fixture = document.createElement('div');
-document.body.appendChild(fixture);
+import QUnit from 'qunit';
+import './util/cli-shim.js';
+import './index.js';
 
-require('./index.js');
+Qunit.start();

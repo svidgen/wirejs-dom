@@ -1,1 +1,1 @@
-require('../../tests/www');
+import '../../tests/www.js';
