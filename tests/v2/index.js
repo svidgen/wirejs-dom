@@ -1,4 +1,4 @@
-import { html, id, span, handle, attribute } from '../../lib/v2/index.js';
+import { html, id, tag, attribute } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 let fixture = document.createElement('div');
@@ -8,7 +8,7 @@ QUnit.testDone(() => {
     fixture.innerHTML = '';
 });
 
-QUnit.module("wirejs-v2");
+QUnit.module("v2");
 
 QUnit.test("html`` returns the first element of the HTML", assert => {
     const t = html`<div>this is the <b>inner html!</b></div>`;
@@ -76,8 +76,8 @@ QUnit.test("html`` extracted node is mutable", assert => {
     assert.equal(data.middle.innerHTML, 'changed', 'data has changed as expected');
 });
 
-QUnit.test("span`` injects a span with a data-id", assert => {
-    const t = html`<div>before ${span('placeholder')} after</div>`;
+QUnit.test("tag.span`` injects a span with a data-id", assert => {
+    const t = html`<div>before ${tag.span('placeholder')} after</div>`;
 
     assert.equal(
         t.innerHTML,
@@ -86,8 +86,8 @@ QUnit.test("span`` injects a span with a data-id", assert => {
     );
 });
 
-QUnit.test("span`` can receive default/init text", assert => {
-    const t = html`<div>before ${span('placeholder', 'some text')} after</div>`;
+QUnit.test("tag.span`` can receive default/init text", assert => {
+    const t = html`<div>before ${tag.span('placeholder', 'some text')} after</div>`;
 
     assert.equal(
         t.innerHTML,
@@ -96,8 +96,8 @@ QUnit.test("span`` can receive default/init text", assert => {
     );
 });
 
-QUnit.test("span`` adds a data getter to its innerHTML", assert => {
-    const { data } = html`<div>before ${span('placeholder', 'some inner html')} after</div>`;
+QUnit.test("tag.span`` adds a data getter to its innerHTML", assert => {
+    const { data } = html`<div>before ${tag.span('placeholder', 'some inner html')} after</div>`;
 
     assert.equal(
         data.placeholder,
@@ -106,8 +106,8 @@ QUnit.test("span`` adds a data getter to its innerHTML", assert => {
     );
 });
 
-QUnit.test("span`` adds a data setter to its innerHTML", assert => {
-    const t = html`<div>before ${span('placeholder')} after</div>`;
+QUnit.test("tag.span`` adds a data setter to its innerHTML", assert => {
+    const t = html`<div>before ${tag.span('placeholder')} after</div>`;
     t.data.placeholder = 'added text';
 
     assert.equal(

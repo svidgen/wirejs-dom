@@ -88,3 +88,4 @@ Both `span` and `attribute` can accept a second parameter with initial values.
 1. A `div()` function for creating `DIV`'s similar to the the `span()` function.
 1. A `node()` function to create a named accessor for `HTMLElement`'s.
 1. A mechanism to link multiple elements and/or attribute values together.
+1. A mechanism (or two) to assign styles to nodes easily.

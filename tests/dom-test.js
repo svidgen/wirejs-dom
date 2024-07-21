@@ -13,7 +13,7 @@ QUnit.testDone(() => {
 	fixture.innerHTML = '';
 });
 
-QUnit.module("wirejs-v1");
+QUnit.module("v1");
 
 QUnit.test("isa() identifies core JS types", function(assert) {
 	var und;

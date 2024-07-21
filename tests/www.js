@@ -1,4 +1,4 @@
-import Qunit from 'qunit';
+import QUnit from 'qunit';
 import './index.js';
 
-Qunit.start();
+QUnit.start();
