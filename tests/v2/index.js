@@ -1,2 +1,2 @@
 import './core.js';
-import './tag.js';
+import './text.js';

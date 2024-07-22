@@ -68,24 +68,24 @@ const element = html`<div>
 `element.data.paragraphClass` now refers to the `title` attribute of
 the `P` tag. It can be read to and written from as a `string`.
 
-Text can be inserted into nodes using the `span()` function:
+Text can be inserted into nodes using the `text()` function:
 
 ```ts
 const element = html`<div>
 	<h3 ${id('title')}>some title</h3>
-	<p>Hi there, ${span('name')}.</p>
+	<p>Hi there, ${text('name')}.</p>
 	<p title=${attribute('paragraphClass')}>some content</p>
 </div>`;
 ```
 
-The `element.data.name` property in an accessor for the `innerHTML` of a
-`SPAN` in the new first paragraph.
+The `element.data.name` property can now be used to read and write text within
+the element.
 
-Both `span` and `attribute` can accept a second parameter with initial values.
+Both `text` and `attribute` can accept a second parameter with initial/default values.
 
 #### In progress
 
-1. A `div()` function for creating `DIV`'s similar to the the `span()` function.
 1. A `node()` function to create a named accessor for `HTMLElement`'s.
+1. A `list()` function **or other mechanism** to enumerate children.
 1. A mechanism to link multiple elements and/or attribute values together.
 1. A mechanism (or two) to assign styles to nodes easily.

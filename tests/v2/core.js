@@ -69,7 +69,7 @@ QUnit.module("v2", () => {
             data.middle.innerHTML = 'changed'
             assert.equal(data.middle.innerHTML, 'changed', 'data has changed as expected');
         });
-    
+   
         QUnit.test("attribute`` can extract a node attribute", assert => {
             const { data } = html`<div>
                 before
