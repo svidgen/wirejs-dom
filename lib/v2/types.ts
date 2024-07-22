@@ -59,7 +59,7 @@ export type html = <T extends ReadonlyArray<any> = []>(
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
-export type text = <ID extends string>(id: ID, body?: string) => ElementBuilder<ID, string>;
+export type textTag = <ID extends string>(id: ID, body?: string) => ElementBuilder<ID, string>;
 
 export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 
@@ -69,3 +69,7 @@ export type attribute = <
 	id: ID,
 	value?: AttributeValue
 ) => ElementBuilder<ID, AttributeValue>;
+
+export type SupportedTags = 'div' | 'span';
+
+export type tagIndex = Record<SupportedTags, textTag>;
