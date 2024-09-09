@@ -11,7 +11,11 @@ export type ElementContext = {
 	container: HTMLElement;
 };
 
-export type ElementBuilder<ID extends string, Target> = {
+export type ElementBuilder<
+	ID extends string,
+	DataType,
+	RenderedType = DataType
+> = {
 	toString: () => string;
 	id?: ID;
 	bless?: (context: ElementContext) => void;
@@ -21,7 +25,14 @@ export type ElementBuilder<ID extends string, Target> = {
 	 *
 	 * Just used to smuggle the type through.
 	 */
-	__targetType?: Target;
+	__dataType?: DataType;
+
+	/**
+	 * @deprecated
+	 *
+	 * Just used to smuggle the type through.
+	 */
+	__renderedType?: RenderedType;
 };
 
 export type KindaPretty<T> = T extends (...args: any) => any
@@ -43,8 +54,8 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 	: never;
 
 export type ElementBuildersToRecordTuple<T> = {
-	[K in keyof T]: T[K] extends ElementBuilder<infer ID, infer Target>
-	? Record<ID, Target>
+	[K in keyof T]: T[K] extends ElementBuilder<infer ID, infer DataType>
+	? Record<ID, DataType>
 	: unknown;
 };
 
@@ -59,7 +70,19 @@ export type html = <T extends ReadonlyArray<any> = []>(
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
-export type textTag = <ID extends string>(id: ID, body?: string) => ElementBuilder<ID, string>;
+export type textElementBuilder = <
+	ID extends string
+>(id: ID, body?: string) => ElementBuilder<ID, string>;
+
+export type list = <
+	ID extends string,
+	InputType = string
+>(
+	id: ID,
+	...args:
+		| [ map?: (item: InputType) => any, data?: InputType[] ]
+		| [ data?: InputType[], map?: (item: InputType) => any ]
+) => ElementBuilder<ID, InputType[]>;
 
 export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 
@@ -69,7 +92,3 @@ export type attribute = <
 	id: ID,
 	value?: AttributeValue
 ) => ElementBuilder<ID, AttributeValue>;
-
-export type SupportedTags = 'div' | 'span';
-
-export type tagIndex = Record<SupportedTags, textTag>;

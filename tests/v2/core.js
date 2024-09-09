@@ -41,7 +41,7 @@ QUnit.module("v2", () => {
             );
         });
         
-        QUnit.test("html`` can extract a node", assert => {
+        QUnit.test("id() can extract a node", assert => {
             const { data } = html`<div>
                 before
                 <div ${id('middle')}>middle</div>
@@ -60,7 +60,7 @@ QUnit.module("v2", () => {
             );
         });
         
-        QUnit.test("html`` extracted node is mutable", assert => {
+        QUnit.test("id() extracted node is mutable", assert => {
             const { data } = html`<div>
                 before
                 <div ${id('middle')}>middle</div>
@@ -70,7 +70,7 @@ QUnit.module("v2", () => {
             assert.equal(data.middle.innerHTML, 'changed', 'data has changed as expected');
         });
    
-        QUnit.test("attribute`` can extract a node attribute", assert => {
+        QUnit.test("attribute() can extract a node attribute", assert => {
             const { data } = html`<div>
                 before
                 <div
