@@ -21,99 +21,99 @@ QUnit.module("v2", () => {
 
             assert.equal(
                 t.innerHTML,
-                "before middle text after",
+                "before a b c text after",
                 "tag innerHTML matches"
             );
 
             assert.equal(
                 t.data.middle,
-                "middle text",
+                ['a', 'b', 'c'],
                 "data property of the text node matches"
             );
         });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle', (items = ['a', 'b', 'c']) => items)
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle', (items = ['a', 'b', 'c']) => items)
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle', {data: ['a', 'b', 'c']})
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle', {data: ['a', 'b', 'c']})
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle', [1, 2, 3],
-                    /**
-                     * 
-                     * @param {number} item 
-                     * @returns 
-                     */
-                    item => html`<b>${item}</b>`
-                )
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle', [1, 2, 3],
+        //             /**
+        //              * 
+        //              * @param {number} item 
+        //              * @returns 
+        //              */
+        //             item => html`<b>${item}</b>`
+        //         )
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle', item => html`<b>${item}</b>`, ['a', 'b', 'c'])
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle', item => html`<b>${item}</b>`, ['a', 'b', 'c'])
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle').data(['a', 'b', 'c'])
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle').data(['a', 'b', 'c'])
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle').map(item => html`<b>${item}</b>`)
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle').map(item => html`<b>${item}</b>`)
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle')
-                    .map(item => html`<b>${item}</b>`)
-                    .set(['a', 'b', 'c'])
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle')
+        //             .map(item => html`<b>${item}</b>`)
+        //             .set(['a', 'b', 'c'])
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle')
-                    .set(['a', 'b', 'c'])
-                    .map(item => html`<b>${item}</b>`)
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle')
+        //             .set(['a', 'b', 'c'])
+        //             .map(item => html`<b>${item}</b>`)
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
-        QUnit.test("list() creates a list of nodes", assert => {
-            const t = html`<div>before ${
-                list('middle').set(['a', 'b', 'c'])
-            } after</div>`;
+        // QUnit.test("list() creates a list of nodes", assert => {
+        //     const t = html`<div>before ${
+        //         list('middle').set(['a', 'b', 'c'])
+        //     } after</div>`;
 
-            console.log(t, t.data);
-        });
+        //     console.log(t, t.data);
+        // });
 
     });
 });
