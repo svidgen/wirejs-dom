@@ -27,9 +27,7 @@ QUnit.module("v2", () => {
                 "tag innerHTML matches"
             );
 
-            console.log(t.data.middle);
-
-            assert.equal(
+            assert.deepEqual(
                 t.data.middle,
                 ['a', 'b', 'c'],
                 "data property of the text node matches"
