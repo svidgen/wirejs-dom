@@ -19,11 +19,15 @@ QUnit.module("v2", () => {
 
             console.log(t, t.data);
 
+            // t.data.middle[1] = 'replaced!';
+
             assert.equal(
                 t.innerHTML,
-                "before a b c text after",
+                "before <div>a</div><div>b</div><div>c</div> after",
                 "tag innerHTML matches"
             );
+
+            console.log(t.data.middle);
 
             assert.equal(
                 t.data.middle,
