@@ -1,15 +1,6 @@
 import { html, list } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
-/**
- * Open questions for list():
- * 
- * 1. what's the best or expected way these get placed into the DOM?
- * 2. when *reading* a list, what do we expect *back?* Do we expect the original items
- * back? Or do we expect the mapped items? Or both ...
- * 
- */
-
 QUnit.module("v2", () => {
     QUnit.module('list', () => {
 
