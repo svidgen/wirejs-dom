@@ -12,14 +12,11 @@ import QUnit from 'qunit';
 
 QUnit.module("v2", () => {
     QUnit.module('list', () => {
+
         QUnit.test("list() creates a list of nodes", assert => {
             const t = html`<div>before ${
                 list('middle', ['a', 'b', 'c'])
             } after</div>`;
-
-            console.log(t, t.data);
-
-            // t.data.middle[1] = 'replaced!';
 
             assert.equal(
                 t.innerHTML,
@@ -32,90 +29,105 @@ QUnit.module("v2", () => {
                 ['a', 'b', 'c'],
                 "data property of the text node matches"
             );
+
+            assert.equal(
+                t.data.middle.length,
+                3,
+                'data property reports the correct length'
+            );
         });
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle', (items = ['a', 'b', 'c']) => items)
-        //     } after</div>`;
+        QUnit.test("list() created nodes can spliced out wholesale", assert => {
+            const t = html`<div>before ${
+                list('middle', ['a', 'b', 'c'])
+            } after</div>`;
 
-        //     console.log(t, t.data);
-        // });
+            const removed = t.data.middle.splice(0);
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle', {data: ['a', 'b', 'c']})
-        //     } after</div>`;
+            assert.equal(
+                t.innerHTML,
+                "before  after",
+                "tag innerHTML matches"
+            );
 
-        //     console.log(t, t.data);
-        // });
+            assert.deepEqual(
+                t.data.middle,
+                [],
+                "data property of the text node matches"
+            );
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle', [1, 2, 3],
-        //             /**
-        //              * 
-        //              * @param {number} item 
-        //              * @returns 
-        //              */
-        //             item => html`<b>${item}</b>`
-        //         )
-        //     } after</div>`;
+            assert.deepEqual(
+                removed,
+                ['a', 'b', 'c'],
+                "removed data matches"
+            );
+        });
 
-        //     console.log(t, t.data);
-        // });
+        QUnit.test("list() created nodes can spliced partially", assert => {
+            const t = html`<div>before ${
+                list('middle', ['a', 'b', 'c'])
+            } after</div>`;
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle', item => html`<b>${item}</b>`, ['a', 'b', 'c'])
-        //     } after</div>`;
+            const removed = t.data.middle.splice(1, 1);
 
-        //     console.log(t, t.data);
-        // });
+            assert.equal(
+                t.innerHTML,
+                "before <div>a</div><div>c</div> after",
+                "tag innerHTML matches"
+            );
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle').data(['a', 'b', 'c'])
-        //     } after</div>`;
+            assert.deepEqual(
+                t.data.middle,
+                ['a', 'c'],
+                "data property of the text node matches"
+            );
 
-        //     console.log(t, t.data);
-        // });
+            assert.deepEqual(
+                removed,
+                ['b'],
+                "removed data matches"
+            );
+        });
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle').map(item => html`<b>${item}</b>`)
-        //     } after</div>`;
+        QUnit.test("list() created nodes can be replaced individually", assert => {
+            const t = html`<div>before ${
+                list('middle', ['a', 'b', 'c'])
+            } after</div>`;
 
-        //     console.log(t, t.data);
-        // });
+            t.data.middle[1] = 'edited';
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle')
-        //             .map(item => html`<b>${item}</b>`)
-        //             .set(['a', 'b', 'c'])
-        //     } after</div>`;
+            assert.equal(
+                t.innerHTML,
+                "before <div>a</div><div>edited</div><div>c</div> after",
+                "tag innerHTML matches"
+            );
 
-        //     console.log(t, t.data);
-        // });
+            assert.deepEqual(
+                t.data.middle,
+                ['a', 'edited', 'c'],
+                "data property of the text node matches"
+            );
+        });
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle')
-        //             .set(['a', 'b', 'c'])
-        //             .map(item => html`<b>${item}</b>`)
-        //     } after</div>`;
+        QUnit.test("list() created nodes can be replaced wholesale", assert => {
+            const t = html`<div>before ${
+                list('middle', ['a', 'b', 'c'])
+            } after</div>`;
 
-        //     console.log(t, t.data);
-        // });
+            t.data.middle = ['x', 'y', 'z'];
 
-        // QUnit.test("list() creates a list of nodes", assert => {
-        //     const t = html`<div>before ${
-        //         list('middle').set(['a', 'b', 'c'])
-        //     } after</div>`;
+            assert.equal(
+                t.innerHTML,
+                "before <div>x</div><div>y</div><div>z</div> after",
+                "tag innerHTML matches"
+            );
 
-        //     console.log(t, t.data);
-        // });
+            assert.deepEqual(
+                t.data.middle,
+                ['x', 'y', 'z'],
+                "data property of the text node matches"
+            );
+        });
 
     });
 });
