@@ -120,5 +120,23 @@ QUnit.module("v2", () => {
             );
         });
 
+        QUnit.test("list() can be initialized empty and set later", assert => {
+            const t = html`<div>before ${list('middle')} after</div>`;
+
+            t.data.middle = ['x', 'y', 'z'];
+
+            assert.equal(
+                t.innerHTML,
+                "before <div>x</div><div>y</div><div>z</div> after",
+                "tag innerHTML matches"
+            );
+
+            assert.deepEqual(
+                t.data.middle,
+                ['x', 'y', 'z'],
+                "data property of the text node matches"
+            );
+        });
+
     });
 });
