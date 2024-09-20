@@ -28,7 +28,33 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("list() created nodes can spliced out wholesale", assert => {
+        QUnit.test("list() data can be sliced", assert => {
+            const t = html`<div>before ${
+                list('middle', ['a', 'b', 'c', 'd', 'e', 'f'])
+            } after</div>`;
+
+            const sliced = t.data.middle.slice(1,4);
+
+            assert.equal(
+                t.innerHTML,
+                "before <div>a</div><div>b</div><div>c</div><div>d</div><div>e</div><div>f</div> after",
+                "tag innerHTML is retained"
+            );
+
+            assert.deepEqual(
+                t.data.middle,
+                ['a', 'b', 'c', 'd', 'e', 'f'],
+                "data property is retained"
+            );
+
+            assert.deepEqual(
+                sliced,
+                ['b', 'c', 'd'],
+                "sliced data matches"
+            );
+        });
+
+        QUnit.test("list() data can spliced out wholesale", assert => {
             const t = html`<div>before ${
                 list('middle', ['a', 'b', 'c'])
             } after</div>`;
@@ -54,7 +80,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("list() created nodes can spliced partially", assert => {
+        QUnit.test("list() data can spliced partially", assert => {
             const t = html`<div>before ${
                 list('middle', ['a', 'b', 'c'])
             } after</div>`;
@@ -80,7 +106,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("list() created nodes can be replaced individually", assert => {
+        QUnit.test("list() items can be replaced individually", assert => {
             const t = html`<div>before ${
                 list('middle', ['a', 'b', 'c'])
             } after</div>`;
@@ -100,7 +126,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("list() created nodes can be replaced wholesale", assert => {
+        QUnit.test("list() data can be replaced wholesale", assert => {
             const t = html`<div>before ${
                 list('middle', ['a', 'b', 'c'])
             } after</div>`;
