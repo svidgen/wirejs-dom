@@ -147,7 +147,7 @@ QUnit.module("v2", () => {
             });
     
             QUnit.test("list() can be initialized empty and set later", assert => {
-                const t = html`<div>before ${list('middle')} after</div>`;
+                const t = html`<div>before ${list('middle', [1])} after</div>`;
     
                 t.data.middle = ['x', 'y', 'z'];
     

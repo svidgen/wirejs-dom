@@ -20,7 +20,7 @@ function todoApp() {
 
     view.data.newTodoForm.onsubmit = event => {
 		event.preventDefault();
-        view.data.todos.push('' + view.data.newTodoText);
+        view.data.todos.push(view.data.newTodoText);
         view.data.newTodoText = '';
     };
 
@@ -41,14 +41,9 @@ QUnit.module('v2', () => {
                 'get things done',
                 'get more things done',
             ];
-            console.log('' + app.innerHTML);
 
 			app.data.newTodoText = 'relax';
-            console.log('' + app.innerHTML);
 			app.data.submitButton.click();
-
-			// huh ... why is this wrong?
-            console.log('' + app.innerHTML);
 
 			assert.deepEqual(
 				app.data.todos,
@@ -60,7 +55,24 @@ QUnit.module('v2', () => {
 				"Final todos match initial todos plus submitted todo"
 			);
 
-			// document.body.removeChild(app);
+            assert.equal(
+                app.innerHTML.replace(/^\s+/gm, '').trim(),
+                `<h2>My Todo's</h2>
+		            <ol><li>get things done
+                            <button>delete</button>
+			            </li><li>get more things done
+                            <button>delete</button>
+			            </li><li>relax
+                            <button>delete</button>
+			        </li></ol>
+                    <form data-id="newTodoForm">
+                        <input type="text" value="">
+                        <button type="submit" value="add" data-id="submitButton">Add</button>
+                    </form>`.replace(/^\s+/gm, '').trim(),
+                "app innerHTML matches expected HTML"
+            );
+
+			document.body.removeChild(app);
         });
     });
 });
