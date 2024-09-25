@@ -54,16 +54,22 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 	: never;
 
 export type ElementBuildersToRecordTuple<T> = {
-	[K in keyof T]: T[K] extends ElementBuilder<infer ID, infer DataType>
-	? Record<ID, DataType>
-	: unknown;
+	[K in keyof T]: T[K] extends ((...args: any[]) => any)
+		? object
+		: T[K] extends ElementBuilder<infer ID, infer DataType>
+		? Record<ID, DataType>
+		: object;
 };
 
 export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
 	? KindaPretty<UnionToIntersection<ElementBuildersToRecordTuple<T>[number]>>
 	: never;
 
-export type html = <T extends ReadonlyArray<any> = []>(
+export type html = <
+	T extends ReadonlyArray<
+		Record<string, any> | ((evt: Event) => any)
+	>
+>(
 	raw: ReadonlyArray<string>,
 	...builders: T
 ) => HTMLElement & { data: ElementBuildersToRecords<T> };
