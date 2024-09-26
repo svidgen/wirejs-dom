@@ -70,5 +70,27 @@ QUnit.module("v2", () => {
                 "data property of the text node matches"
             );
         });
+
+        QUnit.test("text() hoo accepts promises and renders results", async assert => {
+            const t = html`<div>before ${text('middle')} after</div>`;
+
+            const v = Promise.resolve('middle value');
+
+            // will require a be typecast in TS.
+            t.data.middle = v;
+            await v;
+
+            assert.equal(
+                t.innerHTML,
+                "before middle value after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                'middle value',
+                'data property of the text node matches'
+            );
+        });
     });
 });

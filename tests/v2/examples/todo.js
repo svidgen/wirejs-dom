@@ -20,7 +20,7 @@ QUnit.module('v2', () => {
                         <button type='submit' value='add' ${id('submitButton')}>Add</button>
                     </form>
                 </div>`;
-            
+
                 view.data.newTodoForm.onsubmit = event => {
                     event.preventDefault();
                     view.data.todos.push(view.data.newTodoText);

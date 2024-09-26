@@ -90,8 +90,48 @@ QUnit.module("v2", () => {
                 'default value',
                 "extracted data property reads the attribute"
             );
+        });
+
+        QUnit.test("attribute() can be written to", assert => {
+            const { data } = html`<div>
+                before
+                <div
+                    ${id('middle')}
+                    title=${attribute('middleTitle', 'default value')}
+                >middle</div>
+                after
+            </div>`;
         
             data.middleTitle = 'new title';
+        
+            assert.equal(
+                data.middle.getAttribute('title'),
+                'new title',
+                "attribute updates are reflected in the DOM"
+            )
+            assert.equal(
+                data.middleTitle,
+                'new title',
+                "attribute updates are reflected in the getter"
+            );
+        });
+
+        QUnit.test("attribute() can be written to with a promise", async assert => {
+            const { data } = html`<div>
+                before
+                <div
+                    ${id('middle')}
+                    title=${attribute('middleTitle', 'default value')}
+                >middle</div>
+                after
+            </div>`;
+        
+            const p = Promise.resolve('new title');
+
+            // will need a typecast in TS
+            data.middleTitle = p;
+
+            await p;
         
             assert.equal(
                 data.middle.getAttribute('title'),

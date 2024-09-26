@@ -145,6 +145,62 @@ QUnit.module("v2", () => {
                     "data property of the text node matches"
                 );
             });
+
+            QUnit.skip("list() items can be replaced with a promises", async assert => {
+                // not yet implemented. not super high priority ... when we focus on this more,
+                // we'll also want to focus on letting all list methods accept promises -- and for
+                // those that accept lists of items, like `splice()` or `push()`'s N args, we'll
+                // want to conditionally hook into the resolution/`.then()` of each item as well
+                // as they top-level promise that is necessary. aiming at making this look like "magic"
+                // eventually.
+                const t = html`<div>before ${
+                    list('middle', ['a', 'b', 'c'])
+                } after</div>`;
+    
+                const p = Promise.resolve('edited');
+
+                // will require typecast in TS
+                t.data.middle[1] = p;
+
+                await p;
+    
+                assert.equal(
+                    t.innerHTML,
+                    "before <div>a</div><div>edited</div><div>c</div> after",
+                    "tag innerHTML matches"
+                );
+    
+                assert.deepEqual(
+                    t.data.middle,
+                    ['a', 'edited', 'c'],
+                    "data property of the text node matches"
+                );
+            });
+    
+            QUnit.test("list() data can be replaced wholesale with a promise", async assert => {
+                const t = html`<div>before ${
+                    list('middle', ['a', 'b', 'c'])
+                } after</div>`;
+    
+                const p = Promise.resolve(['x', 'y', 'z']);
+
+                // will require typecast in TS
+                t.data.middle = p;
+
+                await p;
+    
+                assert.equal(
+                    t.innerHTML,
+                    "before <div>x</div><div>y</div><div>z</div> after",
+                    "tag innerHTML matches"
+                );
+    
+                assert.deepEqual(
+                    t.data.middle,
+                    ['x', 'y', 'z'],
+                    "data property of the text node matches"
+                );
+            });
     
             QUnit.test("list() can be initialized empty and set later", assert => {
                 const t = html`<div>before ${list('middle', [1])} after</div>`;
