@@ -41,6 +41,28 @@ QUnit.module("v2", () => {
             );
         });
 
+        QUnit.test("html`` can contain interpolate other HTMLElements directly", assert => {
+            const child = html`<span>middle</span>`;
+            const parent = html`<div>before ${child} after</div>`;
+            assert.equal(
+                parent.innerHTML,
+                "before <span>middle</span> after",
+                "the parent markup contains the child"
+            );
+        });
+
+        QUnit.test("html`` trims leading and trailing whitespace around container", assert => {
+            const child = html`
+                <span>middle</span>
+            `;
+            const parent = html`<div>before ${child} after</div>`;
+            assert.equal(
+                parent.innerHTML,
+                "before <span>middle</span> after",
+                "the parent markup contains the child"
+            );
+        });
+
         QUnit.test("id() can extract a node", assert => {
             const { data } = html`<div>
                 before

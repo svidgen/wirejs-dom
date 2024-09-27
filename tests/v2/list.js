@@ -539,7 +539,37 @@ QUnit.module("v2", () => {
                     [1, 7, 8],
                     "data property of the text node matches"
                 );
-            })
+            });
+
+            QUnit.test("list() chainable Array methods can be chained", assert => {
+                const t = html`<div>before ${
+                    list('middle', [8, 1, 7],
+                        /**
+                         * @param {number} n
+                         * */
+                        n => html`<span>Number ${n}</span>`
+                    )
+                } after</div>`;
+
+                t.data.middle
+                    .sort((a, b) => a - b)
+                    .reverse()
+                    .sort((a, b) => a - b)
+                    .reverse()
+                ;
+
+                assert.equal(
+                    t.innerHTML,
+                    "before <span>Number 8</span><span>Number 7</span><span>Number 1</span> after",
+                    "tag innerHTML matches"
+                );
+    
+                assert.deepEqual(
+                    t.data.middle,
+                    [8, 7, 1],
+                    "data property of the text node matches"
+                );
+            });
         })
     });
 });

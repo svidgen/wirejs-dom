@@ -31,9 +31,7 @@
   "devDependencies": {
     "jsdom": "^21.1.0",
     "qunit": "^2.21.0",
-    "rimraf": "^3.0.2"
-  },
-  "dependencies": {
+    "rimraf": "^3.0.2",
     "wirejs-scripts": "^2.0.5"
   }
 }
