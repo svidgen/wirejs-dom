@@ -376,20 +376,25 @@ const element = html`<div>
 The first parameter for inline handlers is the `Event` that triggered them, just like a normal event handler. And, as shown in the example, closures come along for the ride. This allows you to write some pretty self-contained components.
 
 ```ts
-document.body.appendChild(html`<div>
+const app = html`<div>
 	<h2>My Todo App</h2>
-	<ol>${list('todos', text => html`<li>
-		${text}
-		(<a onclick=${() => view.data.todos = [...view.data.todos]
-			.filter(item => item !== text)
-		}>Done!</a>)
+	<ol>${list('todos', (todo) => html`<li>
+		${todo.text}
+		(<b style='cursor: pointer'
+			onclick=${() => app.data.todos = [...app.data.todos]
+			.filter(item => item !== todo)
+		}>Done</b>)
 	</li>`)}</ol>
-	<input type='text' value=${attribute('newTodo', 'Add your todo here...')} />
-	<button onclick=${() => {
-		view.data.todos.push(view.data.newTodo);
-		view.data.newTodoText = '';
-	}}>Add</button>
-</div>`);
+	<form onsubmit=${event => {
+		event.preventDefault();
+		app.data.todos.push({ text: app.data.newTodo });
+		app.data.newTodo = '';
+	}}>
+		<input type='text' value=${attribute('newTodo', '')} />
+		<button type='submit'>Add</button>
+	</form>
+</div>`;
+document.body.appendChild(app);
 ```
 
 This is not alawys recommended. But, it's great for smaller, inlined, or otherwise self-contained components. It can often save on some of the maintenance overhead of creating a bigger or more complex component.
