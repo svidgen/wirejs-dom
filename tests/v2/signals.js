@@ -1,4 +1,4 @@
-import { signal, reactive } from '../../lib/v2/index.js';
+import { signal, reactive, computed } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 QUnit.module("v2", () => {
@@ -176,6 +176,74 @@ QUnit.module("v2", () => {
                 greeting.valueOf(),
                 'Hello, Bob Jones.',
                 "The observed value matches"
+            );
+        });
+
+        QUnit.test('computed() can return a basic value', assert => {
+            const sum = computed(() => 1 + 2);
+
+            assert.equal(
+                sum,
+                3,
+                "the computed value was returned"
+            );
+        });
+
+        QUnit.test('computed() can return a value based on signals', assert => {
+            const width = signal(3);
+            const height = signal(4);
+            const area = computed(() => width * height);
+
+            assert.equal(
+                area,
+                12,
+                "the computed value was returned"
+            );
+        });
+
+        QUnit.test('computed() updates when inner signals change', assert => {
+            const width = signal(3);
+            const height = signal(4);
+            const area = computed(() => width * height);
+
+            let observedValue = null;
+            area.watch(v => observedValue = v);
+            width.value = 5;
+
+            assert.equal(
+                area,
+                20,
+                "the newly computed value was returned"
+            );
+
+            assert.equal(
+                observedValue,
+                20,
+                "the observed value change matches"
+            );
+        });
+
+        QUnit.test('computed() updates when multiple inner signals change', assert => {
+            const width = signal(3);
+            const height = signal(4);
+            const area = computed(() => width * height);
+
+            let observedValue = null;
+            area.watch(v => observedValue = v);
+
+            width.value = 5;
+            height.value = 10;
+
+            assert.equal(
+                area,
+                50,
+                "the newly computed value was returned"
+            );
+
+            assert.equal(
+                observedValue,
+                50,
+                "the observed value change matches"
             );
         });
     });
