@@ -361,8 +361,9 @@ names.push('The Other Steve');
 
 You have two options for event handlers.
 
-1. **Use `attribute()` accessors.**<br />Good for event handlers you may need to overwrite later.
-2. **Inline handlers.**<br />Good for all the other times.
+1. **The `attribute()` accessor.**<br />Good for one-off event handlers you may need to overwrite later.
+1. **The `id()` accessor.**<br />Good for setting many event handlers, either based on a template or in cases where you need to swap them out later.
+1. **Inline handlers.**<br />Good for all the other times.
 
 Here's what an inline handler might look like:
 
@@ -378,19 +379,13 @@ The first parameter for inline handlers is the `Event` that triggered them, just
 ```ts
 const app = html`<div>
 	<h2>My Todo App</h2>
-	<ol>${list('todos', (todo) => html`<li>
-		${todo.text}
-		(<b style='cursor: pointer'
-			onclick=${() => app.data.todos = [...app.data.todos]
-			.filter(item => item !== todo)
-		}>Done</b>)
-	</li>`)}</ol>
+	<ol>${list('todos', (text) => html`<li>${text}</li>`)}</ol>
 	<form onsubmit=${event => {
 		event.preventDefault();
-		app.data.todos.push({ text: app.data.newTodo });
+		app.data.todos.push(app.data.newTodo);
 		app.data.newTodo = '';
 	}}>
-		<input type='text' value=${attribute('newTodo', '')} />
+		<input type='text' value=${attribute('newTodo')} />
 		<button type='submit'>Add</button>
 	</form>
 </div>`;
