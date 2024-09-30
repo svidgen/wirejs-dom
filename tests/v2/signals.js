@@ -246,5 +246,38 @@ QUnit.module("v2", () => {
                 "the observed value change matches"
             );
         });
+
+        QUnit.test('computed() can depend on other computed values', assert => {
+            const width = signal(3);
+            const height = signal(4);
+            const depth = signal(5);
+            const area = computed(() => width * height);
+            const volume = computed(() => area * depth);
+
+            assert.equal(
+                volume,
+                3 * 4 * 5,
+                "the initial computed value matches the expected value"
+            );
+
+            let observedValue = null;
+            volume.watch(v => observedValue = v);
+
+            width.value = 5;
+            height.value = 10;
+            depth.value = 20;
+
+            assert.equal(
+                volume,
+                5 * 10 * 20,
+                "the newly computed value was returned"
+            );
+
+            assert.equal(
+                observedValue,
+                5 * 10 * 20,
+                "the observed value change matches"
+            );
+        });
     });
 });
