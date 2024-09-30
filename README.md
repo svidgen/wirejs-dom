@@ -398,6 +398,10 @@ This is not alawys recommended. But, it's great for smaller, inlined, or otherwi
 
 (In no particular order.)
 
+1. Allow signal incorporation into `html` tags
+1. Emit events from `id`, `text`, `attribute`, and `list` on change
+1. Allow identifiers to be used N times
+1. Allow `id`, `text`, `attribute`, and `list` to be defined externally and injected N times
 1. A good rehydration mechanism
 1. SSR+SSG with rehydration support
 
