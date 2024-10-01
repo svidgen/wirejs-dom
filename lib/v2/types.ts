@@ -96,5 +96,7 @@ export type attribute = <
 	ID extends string
 >(
 	id: ID,
-	value?: AttributeValue
+	...args:
+		| [ map?: (item: AttributeValue) => AttributeValue, value?: AttributeValue[] ]
+		| [ value?: AttributeValue[], map?: (item: AttributeValue) => AttributeValue ]
 ) => ElementBuilder<ID, AttributeValue>;

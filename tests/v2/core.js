@@ -61,5 +61,7 @@ QUnit.module("v2", () => {
                 "the parent markup contains the child"
             );
         });
+
+        // TODO: function interpolation tests
     });
 });
