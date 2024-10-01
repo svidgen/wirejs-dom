@@ -66,7 +66,7 @@ QUnit.module("v2", () => {
 
             assert.equal(
                 t.data.middle,
-                "",
+                undefined,
                 "data property of the text node matches"
             );
         });
@@ -90,6 +90,120 @@ QUnit.module("v2", () => {
                 t.data.middle,
                 'middle value',
                 'data property of the text node matches'
+            );
+        });
+
+        QUnit.test('can map values in (f, v) order', assert => {
+            const t = html`<div>before ${
+                text('middle', t => t.toUpperCase(), 'middle value')
+            } after</div>`;
+
+            assert.equal(
+                t.innerHTML,
+                "before MIDDLE VALUE after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                "middle value",
+                "data property of the text node matches"
+            );
+        });
+
+        QUnit.test('can update mapped values in (f, v) order', assert => {
+            const t = html`<div>before ${
+                text('middle', t => t.toUpperCase(), 'middle value')
+            } after</div>`;
+
+            t.data.middle = 'updated value';
+
+            assert.equal(
+                t.innerHTML,
+                "before UPDATED VALUE after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                "updated value",
+                "data property of the text node matches"
+            );
+        });
+
+        QUnit.test('can map values in (v, f) order', assert => {
+            const t = html`<div>before ${
+                text('middle', 'middle value', t => t.toUpperCase())
+            } after</div>`;
+
+            assert.equal(
+                t.innerHTML,
+                "before MIDDLE VALUE after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                "middle value",
+                "data property of the text node matches"
+            );
+        });
+
+        QUnit.test('can update mapped values in (v, f) order', assert => {
+            const t = html`<div>before ${
+                text('middle', 'middle value', t => t.toUpperCase())
+            } after</div>`;
+
+            t.data.middle = 'updated value';
+
+            assert.equal(
+                t.innerHTML,
+                "before UPDATED VALUE after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                "updated value",
+                "data property of the text node matches"
+            );
+        });
+
+        QUnit.test("can map values in f-only 'order'", assert => {
+            const t = html`<div>before ${
+                text('middle', () => 'constant value')
+            } after</div>`;
+
+            assert.equal(
+                t.innerHTML,
+                "before constant value after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                undefined,
+                "data property of the text node matches"
+            );
+        });
+
+        QUnit.test("can update mapped value in f-only order", assert => {
+            const t = html`<div>before ${
+                text('middle', t => t?.toUpperCase())
+            } after</div>`;
+
+            t.data.middle = 'updated value';
+
+            assert.equal(
+                t.innerHTML,
+                "before UPDATED VALUE after",
+                "tag innerHTML matches"
+            );
+
+            assert.equal(
+                t.data.middle,
+                "updated value",
+                "data property of the text node matches"
             );
         });
     });

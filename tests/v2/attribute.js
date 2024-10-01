@@ -78,7 +78,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("can map values in (v,f) order ", assert => {
+        QUnit.test("can map values in (v, f) order ", assert => {
             const { data } = html`<div>
                 before
                 <div ${id('middle')} title=${
@@ -100,7 +100,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("can update mapped values in (v,f) order ", assert => {
+        QUnit.test("can update mapped values in (v, f) order ", assert => {
             const { data } = html`<div>
                 before
                 <div ${id('middle')} title=${

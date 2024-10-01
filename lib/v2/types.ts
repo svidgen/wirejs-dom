@@ -78,7 +78,12 @@ export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
 export type textElementBuilder = <
 	ID extends string
->(id: ID, body?: string) => ElementBuilder<ID, string>;
+>(
+	id: ID,
+	...args:
+	| [ map?: (item: string) => string, value?: string[] ]
+	| [ value?: string[], map?: (item: string) => string ]
+) => ElementBuilder<ID, string>; 
 
 export type list = <
 	ID extends string,
