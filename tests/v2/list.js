@@ -2,9 +2,9 @@ import { html, list } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 QUnit.module("v2", () => {
-    QUnit.module('list', () => {
+    QUnit.module('list()', () => {
         QUnit.module('default mapping', () => {
-            QUnit.test("list() creates a list of nodes", assert => {
+            QUnit.test("creates a list of nodes", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -28,7 +28,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() data can be sliced", assert => {
+            QUnit.test("data can be sliced", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c', 'd', 'e', 'f'])
                 } after</div>`;
@@ -54,7 +54,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() data can spliced out wholesale", assert => {
+            QUnit.test("data can spliced out wholesale", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -80,7 +80,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() data can spliced partially", assert => {
+            QUnit.test("data can spliced partially", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -106,7 +106,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() items can be replaced individually", assert => {
+            QUnit.test("items can be replaced individually", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -126,7 +126,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() data can be replaced wholesale", assert => {
+            QUnit.test("data can be replaced wholesale", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -146,7 +146,7 @@ QUnit.module("v2", () => {
                 );
             });
 
-            QUnit.skip("list() items can be replaced with a promises", async assert => {
+            QUnit.skip("items can be replaced with a promises", async assert => {
                 // not yet implemented. not super high priority ... when we focus on this more,
                 // we'll also want to focus on letting all list methods accept promises -- and for
                 // those that accept lists of items, like `splice()` or `push()`'s N args, we'll
@@ -177,7 +177,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() data can be replaced wholesale with a promise", async assert => {
+            QUnit.test("data can be replaced wholesale with a promise", async assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -202,7 +202,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be initialized empty and set later", assert => {
+            QUnit.test("can be initialized empty and set later", assert => {
                 const t = html`<div>before ${list('middle', [1])} after</div>`;
     
                 t.data.middle = ['x', 'y', 'z'];
@@ -221,7 +221,7 @@ QUnit.module("v2", () => {
             });
     
     
-            QUnit.test("list() can be pushed to", assert => {
+            QUnit.test("can be pushed to", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -247,7 +247,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be popped from", assert => {
+            QUnit.test("can be popped from", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -279,7 +279,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be unshifted to", assert => {
+            QUnit.test("can be unshifted to", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -305,7 +305,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be shifted from", assert => {
+            QUnit.test("can be shifted from", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -337,7 +337,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be reversed", assert => {
+            QUnit.test("can be reversed", assert => {
                 const t = html`<div>before ${
                     list('middle', ['a', 'b', 'c'])
                 } after</div>`;
@@ -363,7 +363,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be sorted using default string sort", assert => {
+            QUnit.test("can be sorted using default string sort", assert => {
                 const t = html`<div>before ${
                     list('middle', ['b', 'd', 'c', 'a'])
                 } after</div>`;
@@ -389,7 +389,7 @@ QUnit.module("v2", () => {
                 );
             });
     
-            QUnit.test("list() can be sorted using arbitrary sort", assert => {
+            QUnit.test("can be sorted using arbitrary sort", assert => {
                 const t = html`<div>before ${
                     list('middle', ['b', 'd', 'c', 'a'])
                 } after</div>`;
@@ -420,7 +420,7 @@ QUnit.module("v2", () => {
         });
 
         QUnit.module('custom mapping', () => {
-            QUnit.test("list() creates a list of nodes", assert => {
+            QUnit.test("creates a list of nodes", assert => {
                 const t = html`<div>before ${
                     list('middle', [4, 5, 6],
                         /**
@@ -449,7 +449,7 @@ QUnit.module("v2", () => {
                 );
             });
 
-            QUnit.test("list() data can be sliced", assert => {
+            QUnit.test("data can be sliced", assert => {
                 const t = html`<div>before ${
                     list('middle', [4, 5, 6, 7, 8, 9],
                         /**
@@ -485,7 +485,7 @@ QUnit.module("v2", () => {
                 )
             });
 
-            QUnit.test("list() items can be updated individually", assert => {
+            QUnit.test("items can be updated individually", assert => {
                 const t = html`<div>before ${
                     list('middle', [4, 5, 6],
                         /**
@@ -516,7 +516,7 @@ QUnit.module("v2", () => {
                 );
             });
 
-            QUnit.test("list() items can be sorted", assert => {
+            QUnit.test("items can be sorted", assert => {
                 const t = html`<div>before ${
                     list('middle', [8, 1, 7],
                         /**
@@ -541,7 +541,7 @@ QUnit.module("v2", () => {
                 );
             });
 
-            QUnit.test("list() chainable Array methods can be chained", assert => {
+            QUnit.test("chainable Array methods can be chained", assert => {
                 const t = html`<div>before ${
                     list('middle', [8, 1, 7],
                         /**

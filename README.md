@@ -42,13 +42,11 @@ But, more importantly, buckle up for V2. It's going to be *neat*.
 
 ## V2 Preview
 
-The new typed API is based on tagged template literals. It *inverts* the way you might normally think of front-end frameworks and their "hook" mechanisms. Many JS frameworks ask you to create hooks with a `signal` interface that you then inject into JSX. The JSX is typically then re-rendered whenever the signal fires.
+The new typed API focuses on tagged template literals. This is the inverse of how most front-end frameworks operate with their "hook" (or signal) mechanisms. With these frameworks, you to create state outside the DOM with a "hook" or a `signal` and inject it into the DOM via JSX. Updates to the state trigger a re-render of the component.
 
-`wirejs` works *mostly* in the opposite direction. You write streamlined HTML that emits direct accessors. You can then read or write to the accessor. The DOM node or property you write is then updated *directly*.
+`wirejs` works primarily in the opposite direction. You write streamlined HTML that emits direct accessors to its state. You can then read or write to the accessor. The DOM node or properties you write to are then updated *directly*.
 
 There is no component-level re-render unless *you* re-render it.
-
-You'll see what I mean. It's actually really simple. Let's take a look.
 
 ### The Basics
 
@@ -398,10 +396,10 @@ This is not alawys recommended. But, it's great for smaller, inlined, or otherwi
 
 (In no particular order.)
 
-1. Allow signal incorporation into `html` tags
+1. Allow signal incorporation into `html`, `text`, `attribute`, and `list` tags
 1. Emit events from `id`, `text`, `attribute`, and `list` on change
 1. Allow identifiers to be used N times
-1. Allow `id`, `text`, `attribute`, and `list` to be defined externally and injected N times
+1. Allow `text`, `attribute`, and `list` to be defined externally and injected N times
 1. A good rehydration mechanism
 1. SSR+SSG with rehydration support
 

@@ -2,8 +2,8 @@ import { html, text } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 QUnit.module("v2", () => {
-    QUnit.module('text', () => {
-        QUnit.test("text() creates a text only hook", assert => {
+    QUnit.module('text()', () => {
+        QUnit.test("creates a text only hook", assert => {
             const t = html`<div>before ${text('middle', 'middle text')} after</div>`;
 
             assert.equal(
@@ -19,7 +19,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("text() hook can be written to", assert => {
+        QUnit.test("prop can be written to", assert => {
             const t = html`<div>before ${text('middle', 'middle text')} after</div>`;
 
             t.data.middle = 'new text';
@@ -37,7 +37,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("text() hook does not render HTML", assert => {
+        QUnit.test("prop does not render HTML", assert => {
             const t = html`<div>before ${text('middle', 'middle text')} after</div>`;
 
             t.data.middle = 'new <b>bold</b> next';
@@ -55,7 +55,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("text() hook does not require default content", assert => {
+        QUnit.test("prop does not require default content", assert => {
             const t = html`<div>before ${text('middle')} after</div>`;
 
             assert.equal(
@@ -71,7 +71,7 @@ QUnit.module("v2", () => {
             );
         });
 
-        QUnit.test("text() hoo accepts promises and renders results", async assert => {
+        QUnit.test("prop accepts promises and renders results", async assert => {
             const t = html`<div>before ${text('middle')} after</div>`;
 
             const v = Promise.resolve('middle value');
