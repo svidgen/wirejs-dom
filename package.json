@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/svidgen/dom#readme",
   "devDependencies": {
+    "@types/qunit": "^2.19.10",
     "jsdom": "^21.1.0",
     "qunit": "^2.21.0",
     "rimraf": "^3.0.2",

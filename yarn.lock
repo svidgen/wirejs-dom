@@ -190,6 +190,11 @@
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.15.tgz#adde8a060ec9c305a82de1babc1056e73bd64dce"
   integrity sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==
 
+"@types/qunit@^2.19.10":
+  version "2.19.10"
+  resolved "https://registry.yarnpkg.com/@types/qunit/-/qunit-2.19.10.tgz#ab859a76a1e6aadcba45d20d6d6307cd1fc11a01"
+  integrity sha512-gVB+rxvxmbyPFWa6yjjKgcumWal3hyqoTXI0Oil161uWfo1OCzWZ/rnEumsx+6uVgrwPrCrhpQbLkzfildkSbg==
+
 "@types/range-parser@*":
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.7.tgz#50ae4353eaaddc04044279812f52c8c65857dbcb"
