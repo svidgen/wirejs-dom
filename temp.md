@@ -6,7 +6,7 @@ The particular case where this is a concern is in managing event callbacks. Two 
 
 ## Firstly, Here's What We Know
 
-Whenever objects become "unreachable" from the global scope, they can be cleaned up. *That's basically it.* This is done using a "mark and sweep" alogrithm. Unlike reference counting approaches, this organically removes cycles by starting from the global scope, finding all reachable objects, marking them as "reachable", and recursing. when this is done, any objects that haven't been reached are garbage collected. (See [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_management#mark-and-sweep_algorithm).)
+Whenever objects become "unreachable" from a root scope (e.g., `global` or `window`), they can be cleaned up. *That's basically it.* This is done using a "mark and sweep" alogrithm. Unlike reference counting approaches, this organically removes cycles by starting from the global scope, finding all reachable objects, marking them as "reachable", and recursing. when this is done, any objects that haven't been reached are garbage collected. (See [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_management#mark-and-sweep_algorithm).)
 
 So, in one of the simplest base cases, we might have a node with a handler that refers to the node itself. This forms a cycle. Reference counting garbage collectors don't organically know how to bust these cycles.
 
@@ -22,7 +22,9 @@ graph
 
 However, the mark and sweep algorithm used by all modern JavaScript engines knows to destroy these objects when all *other* references to both `DOM Node` and `handler` are eliminated. Put another way, if nothing from the global scope points to these objects (directly or indirectly), they're "unreachble".
 
-This cannot be cleaned up:
+#### The `document`.
+
+The `document` can be considered a root scope. Hence, nodes in the `document` are reachable and are not eligible for garbage collection.
 
 ```mermaid
 graph LR
@@ -40,7 +42,9 @@ graph LR
     dom -- contains --> n1
 ```
 
-This also cannot be cleaned up:
+#### The `window`.
+
+The `window` object is a root scope. Properties of `window`, including global variables, are therefore reachable. And anything those property point to or have closures around are considered reachable.
 
 ```mermaid
 graph LR
@@ -58,26 +62,12 @@ graph LR
     var -- refers to --> handler
 ```
 
-This can be.
+#### Event loops.
 
-```mermaid
-graph LR
-    subgraph Cycle
-        n1(DOM Node)
-        handler(handler)
-        n1 -- has --> handler
-        handler -- refers to --> n1
-    end
-    
-    subgraph Globals
-        dom{{DOM}}
-        var{{"window.handlers[]"}}
-    end
-    
-    Globals -. nothing .-> Cycle
-```
 
-We can also use "weak" collections and references to refer to items *from the global scope* without retaining the objects in memory.
+### Weak References
+
+We can also use "weak" collections and references to refer to items *from a root scope* without retaining the objects in memory.
 
 ```js
 function getSomething() {
@@ -88,7 +78,7 @@ function getSomething() {
 window.something = getSomething();
 ```
 
-Now, although the global `something` property refers to `item` from the `getSomething()` closure, it's a weakly held reference. Users of the global scope must first check to see if the reference still exists before using it &mdash; and in our trivial example, the `item` is likely to disappear very quickly because *nothing else* can access it.
+Now, although the global `something` property refers to `item` from the `getSomething()` closure, it's a weakly held reference. Consumers of the global `something` will first need to check whether the reference still contains `item` before using it &mdash; and in our trivial example, we would expect `item` to disappear very quickly because *nothing else* refers to it.
 
 ```mermaid
 graph LR
@@ -110,7 +100,7 @@ graph LR
 
 When the garbage collector performs its sweep, it traverses from `something` to `item ref` and *stops*. It does not traverse down to `item`. It is considered "unreachable" from the global scope and is liable for garbage collection.
 
-## Now, the Individual Cases
+## Now, `wirejs-dom`'s Important Cases
 
 ### Case 1 - Event Callbacks
 
