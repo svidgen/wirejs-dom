@@ -64,6 +64,7 @@ graph LR
 
 #### Event loops.
 
+The event loop is a root scope. It can "reach" thing that are registered in the [event loop queue](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop#queue). When a DOM event is fired, or we set a timeout, or create an interval, the registered callback goes into the event loop queue (roughly speaking), making it accessible to the event loop, and thus making it reachable by a root scope.
 
 ### Weak References
 
@@ -121,8 +122,30 @@ const view = html`<div>
 </div>`;
 ```
 
+In this case, we have a reachability graph that looks something like this:
 
- 
+```mermaid
+graph LR
+    cb(<i>Anonymous event handler</i>)
+    view --> t
+    view --> nt
+    
+    t(title)
+    nt(newTitle)
+    
+    cb --> view
+    cb --> t
+    cb --> nt
+    view --> cb
+    
+    t --> view
+    nt --> view
+```
+
+In other words, *pretty much everything refers to everything else.* Strictly speaking, the `view` nestles the `title` and `newTitle` properties under its `data` property; but they're essentially reachable via `view`. And each property receives the `view` as context and may or may not hold onto that context indefinitely. At the very least, each property holds onto a *portion* of the `view` nodes and/or their attributes.
+
+In general, the `node` is *expected* to be the "local root" object, holding the whole structure in memory so long as it's in the `document`; but nothing really prohibits a customer from grabbing a reference to `view.data`, thus keeping the whole structure in memory long after `view` leaves the `document`.
+
 ### DOM `onadd` and `onremove`
 
 
