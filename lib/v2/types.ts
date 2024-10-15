@@ -72,7 +72,7 @@ export type html = <
 >(
 	raw: ReadonlyArray<string>,
 	...builders: T
-) => HTMLElement & { data: ElementBuildersToRecords<T> };
+) => WithDomEvents<HTMLElement> & { data: ElementBuildersToRecords<T> };
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
@@ -106,7 +106,7 @@ export type attribute = <
 		| [ value?: AttributeValue[], map?: (item: AttributeValue) => AttributeValue ]
 ) => ElementBuilder<ID, AttributeValue>;
 
-export type addWatcherHooks = <T extends Node>(node: T) => asserts node is T & {
+export type WithDomEvents<T extends Node> = T & {
 	/**
 	 * Invokes the callbacks when the node is added to the document.
 	 * 
@@ -123,3 +123,5 @@ export type addWatcherHooks = <T extends Node>(node: T) => asserts node is T & {
 	 */
 	onremove: (callback: () => any) => T;
 };
+
+export type addWatcherHooks = <T extends Node>(node: T) => asserts node is WithDomEvents<T>;
