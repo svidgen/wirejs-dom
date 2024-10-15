@@ -105,3 +105,21 @@ export type attribute = <
 		| [ map?: (item: AttributeValue) => AttributeValue, value?: AttributeValue[] ]
 		| [ value?: AttributeValue[], map?: (item: AttributeValue) => AttributeValue ]
 ) => ElementBuilder<ID, AttributeValue>;
+
+export type addWatcherHooks = (node: Node) => asserts node is Node & {
+	/**
+	 * Invokes the callbacks when the node is added to the document.
+	 * 
+	 * @param callback
+	 * @returns 
+	 */
+	onadd: (callback: () => any) => void;
+
+	/**
+	 * Invokes the callback when the node is removed from the document.
+	 * 
+	 * @param callback
+	 * @returns 
+	 */
+	onremove: (callback: () => any) => void;
+};

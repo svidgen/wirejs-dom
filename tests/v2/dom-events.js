@@ -1,4 +1,4 @@
-import { registerNodeDomCallbacks } from '../../lib/v2/components/dom-events.js';
+import { addWatcherHooks, registerNodeDomCallbacks } from '../../lib/v2/components/dom-events.js';
 import QUnit, { test } from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not
@@ -53,6 +53,43 @@ QUnit.module('v2', () => {
                     onadd() { },
                     onremove() { resolve('onremove') }
                 });
+                sleep(100).then(() => reject('Timed out'));
+            });
+
+            document.body.appendChild(node);
+
+            // a short sleep is required to ensure the underlying MutationObserver sees
+            // the node enter the DOM. otherwise, it reports the addition and removal in
+            // a single event, and wirejs treats it like a no-op.
+            await sleep();
+
+            document.body.removeChild(node);
+
+            assert.equal(await event, 'onremove', 'onremove() callback fired');
+        });
+
+        test('addWatcherHooks() provides onadd() that fires on document insert', async assert => {
+            const node = document.createElement('div');
+            addWatcherHooks(node);
+
+            const event = new Promise((resolve, reject) => {
+                node.onadd(() => resolve('onadd'));
+                node.onremove(() => resolve('onremove'));
+                sleep(100).then(() => reject('Timed out'));
+            });
+
+            document.body.appendChild(node);
+
+            assert.equal(await event, 'onadd', 'onadd() callback fired');
+        });
+
+        test('addWatcherHooks() provides onadd() that fires on document insert', async assert => {
+            const node = document.createElement('div');
+            addWatcherHooks(node);
+
+            const event = new Promise((resolve, reject) => {
+                node.onadd(() => {});
+                node.onremove(() => resolve('onremove'));
                 sleep(100).then(() => reject('Timed out'));
             });
 

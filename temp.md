@@ -146,8 +146,20 @@ In other words, *pretty much everything refers to everything else.* Strictly spe
 
 In general, the `node` is *expected* to be the "local root" object, holding the whole structure in memory so long as it's in the `document`; but nothing really prohibits a customer from grabbing a reference to `view.data`, thus keeping the whole structure in memory long after `view` leaves the `document`.
 
-### DOM `onadd` and `onremove`
+### DOM `onadd` and `onremove` events
 
+The final API design is pending, but we could imagine it looks something like this:
+
+```ts
+const view = html`<div>
+    some html
+</div>`.on({
+    add() {},
+    remove() {},
+});
+```
+
+### CSS Signals
 
 ### Other Remote Concerns
 
