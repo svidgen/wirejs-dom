@@ -83,7 +83,7 @@ QUnit.module('v2', () => {
             assert.equal(await event, 'onadd', 'onadd() callback fired');
         });
 
-        test('addWatcherHooks() provides onadd() that fires on document insert', async assert => {
+        test('addWatcherHooks() provides onremove() that fires on document removal', async assert => {
             const node = document.createElement('div');
             addWatcherHooks(node);
 
@@ -103,6 +103,47 @@ QUnit.module('v2', () => {
             document.body.removeChild(node);
 
             assert.equal(await event, 'onremove', 'onremove() callback fired');
+        });
+
+        test('addWatcherHooks() is onadd().onremove() chainable', async assert => {
+            const node = document.createElement('div');
+            addWatcherHooks(node);
+
+            let returnedNode = undefined;
+
+            const event = new Promise((resolve, reject) => {
+                returnedNode = node.onadd(() => {}).onremove(() => resolve('onremove'));
+                sleep(100).then(() => reject('Timed out'));
+            });
+
+            document.body.appendChild(node);
+
+            // a short sleep is required to ensure the underlying MutationObserver sees
+            // the node enter the DOM. otherwise, it reports the addition and removal in
+            // a single event, and wirejs treats it like a no-op.
+            await sleep();
+
+            document.body.removeChild(node);
+
+            assert.equal(await event, 'onremove', 'onremove() callback fired');
+            assert.equal(returnedNode, node, 'returned node is the original node');
+        });
+
+        test('addWatcherHooks() is onadd().onremove() chainable', async assert => {
+            const node = document.createElement('div');
+            addWatcherHooks(node);
+
+            let returnedNode = undefined;
+
+            const event = new Promise((resolve, reject) => {
+                returnedNode = node.onremove(() => {}).onadd(() => resolve('onadd'));
+                sleep(100).then(() => reject('Timed out'));
+            });
+
+            document.body.appendChild(node);
+
+            assert.equal(await event, 'onadd', 'onadd() callback fired');
+            assert.equal(returnedNode, node, 'returned node is the original node');
         });
     })
 });
