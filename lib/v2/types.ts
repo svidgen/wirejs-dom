@@ -81,8 +81,8 @@ export type textElementBuilder = <
 >(
 	id: ID,
 	...args:
-	| [ map?: (item: string) => string, value?: string[] ]
-	| [ value?: string[], map?: (item: string) => string ]
+		| [ map?: (item: string) => string, value?: string[] ]
+		| [ value?: string[], map?: (item: string) => string ]
 ) => ElementBuilder<ID, string>; 
 
 export type list = <
@@ -94,6 +94,17 @@ export type list = <
 		| [ map?: (item: InputType) => any, data?: InputType[] ]
 		| [ data?: InputType[], map?: (item: InputType) => any ]
 ) => ElementBuilder<ID, InputType[]>;
+
+export type node = <
+	ID extends string,
+	ReturnType extends HTMLElement,
+	InputType = string,
+>(
+	id: ID,
+	...args:
+		| [ map?: (item?: InputType) => ReturnType, value?: InputType ]
+		| [ value: InputType, map?: (item?: InputType) => ReturnType ]
+) => ElementBuilder<ID, InputType>;
 
 export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 

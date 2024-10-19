@@ -372,7 +372,7 @@ const element = html`<div>
 </div>`;
 ```
 
-The first parameter for inline handlers is the `Event` that triggered them, just like a normal event handler. And, as shown in the example, closures come along for the ride. This allows you to write some pretty self-contained components.
+The first parameter for inline handlers is the `Event` that triggered them, just like a normal event handler. Closures work as expected, allowing you to write some pretty self-contained components.
 
 ```ts
 const app = html`<div>
@@ -396,8 +396,6 @@ This is not alawys recommended. But, it's great for smaller, inlined, or otherwi
 
 (In no particular order.)
 
-1. Emit events from `id`, `text`, `attribute`, and `list` on change
-1. Allow identifiers to be used N times
 1. Allow `text`, `attribute`, and `list` to be defined externally and injected N times
 1. Mechanism for adding methods to a component
 1. Mechanism for adding events to a component
