@@ -2,45 +2,45 @@ import { html, node } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 QUnit.module("v2", () => {
-    QUnit.module('node()', () => {
+	QUnit.module('node()', () => {
 
-        QUnit.test("can create a named element", assert => {
+		QUnit.test("can create a named element", assert => {
 			const t = html`<div>before ${node(
 				'middle', () => html`<span>middle text</span>`
 			)} after</div>`;
 
-            assert.equal(
-                t.innerHTML,
+			assert.equal(
+				t.innerHTML,
 				"before <span>middle text</span> after",
-                "tag innerHTML matches"
-            );
+				"tag innerHTML matches"
+			);
 
-            assert.equal(
-                t.data.middle,
+			assert.equal(
+				t.data.middle,
 				undefined,
-                "data property of the text node matches"
+				"data property of the text node matches"
 			);
 		});
 
-        QUnit.test("can have default values", assert => {
+		QUnit.test("can have default values", assert => {
 			const t = html`<div>before ${node(
 				'middle', 'middle text', (v) => html`<span>${v}</span>`)
-			} after</div>`;
+				} after</div>`;
 
-            assert.equal(
-                t.innerHTML,
+			assert.equal(
+				t.innerHTML,
 				"before <span>middle text</span> after",
-                "tag innerHTML matches"
-            );
+				"tag innerHTML matches"
+			);
 
-            assert.equal(
-                t.data.middle,
-                'middle text',
-                "data property of the text node matches"
+			assert.equal(
+				t.data.middle,
+				'middle text',
+				"data property of the text node matches"
 			);
 		});
 
-        QUnit.test("set be set", assert => {
+		QUnit.test("set be set", assert => {
 			const t = html`<div>before ${node(
 				'middle',
 				'default value',
@@ -48,24 +48,24 @@ QUnit.module("v2", () => {
 				 * @param {string} v 
 				 */
 				(v) => html`<span>${v}</span>`)
-			} after</div>`;
+				} after</div>`;
 
 			t.data.middle = 'something else';
 
-            assert.equal(
-                t.innerHTML,
+			assert.equal(
+				t.innerHTML,
 				"before <span>something else</span> after",
-                "tag innerHTML matches"
-            );
+				"tag innerHTML matches"
+			);
 
-            assert.equal(
-                t.data.middle,
-                'something else',
-                "data property of the text node matches"
+			assert.equal(
+				t.data.middle,
+				'something else',
+				"data property of the text node matches"
 			);
 		});
 
-        QUnit.test("can be conditional", assert => {
+		QUnit.test("can be conditional", assert => {
 			const t = html`<div>before ${node(
 				'middle',
 				11,
@@ -77,24 +77,24 @@ QUnit.module("v2", () => {
 					html`<b>${n} is odd</b>`
 			)} after</div>`;
 
-            assert.equal(
-                t.innerHTML,
+			assert.equal(
+				t.innerHTML,
 				"before <b>11 is odd</b> after",
-                "tag innerHTML matches"
-            );
+				"tag innerHTML matches"
+			);
 
 			t.data.middle = 22;
 
-            assert.equal(
-                t.innerHTML,
+			assert.equal(
+				t.innerHTML,
 				"before <i>22 is even</i> after",
-                "tag innerHTML matches"
-            );
+				"tag innerHTML matches"
+			);
 
-            assert.equal(
-                t.data.middle,
+			assert.equal(
+				t.data.middle,
 				22,
-                "data property of the text node matches"
+				"data property of the text node matches"
 			);
 		});
 
