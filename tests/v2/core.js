@@ -1,4 +1,4 @@
-import { html, id, attribute } from '../../lib/v2/index.js';
+import { html, text } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not
@@ -84,6 +84,22 @@ QUnit.module("v2", () => {
 			assert.equal(await event, 'onadd', 'onadd() callback fired');
 		});
 
+		QUnit.test("onadd() supplies self", async assert => {
+			const node = html`<div>
+				hey there world.
+				${text('k', 'v')}
+			</div>`;
+
+			const event = new Promise((resolve, reject) => {
+				node.onadd(self => resolve(self.data.k));
+				sleep(100).then(() => reject('Timed out'));
+			});
+
+			document.body.appendChild(node);
+
+			assert.equal(await event, 'v', 'onadd() callback fired with expected value');
+		});
+
 		QUnit.test("has onremove() which fires on document removal", async assert => {
 			const node = html`<div>
 				hey there world.
@@ -104,6 +120,29 @@ QUnit.module("v2", () => {
 			document.body.removeChild(node);
 
 			assert.equal(await event, 'onremove', 'onadd() callback fired');
+		});
+
+		QUnit.test("onremove() supplies self", async assert => {
+			const node = html`<div>
+				hey there world.
+				${text('k', 'v')}
+			</div>`;
+
+			const event = new Promise((resolve, reject) => {
+				node.onremove(self => resolve(self.data.k));
+				sleep(100).then(() => reject('Timed out'));
+			});
+
+			document.body.appendChild(node);
+
+			// a short sleep is required to ensure the underlying MutationObserver sees
+			// the node enter the DOM. otherwise, it reports the addition and removal in
+			// a single event, and wirejs treats it like a no-op.
+			await sleep();
+
+			document.body.removeChild(node);
+
+			assert.equal(await event, 'v', 'onadd() callback fired with expected value');
 		});
 
 		// TODO: function interpolation tests
