@@ -330,9 +330,7 @@ Your initial markup will look like this:
 </div>
 ```
 
----
-
-### Notice!
+#### Note
 
 **1. Setting a `list()` from an `Array` creates a *copy* of the original.** Updates to the original `Array` do not update the DOM.
 
@@ -351,6 +349,23 @@ names.push('The Other Steve');
 	People I know.
 	<ol><!-- An empty Text node lives here. (Don't remove it!) --></ol>
 </div>
+```
+
+### The `node()` Accessor
+
+If all else fails, or if you just need to embed a little logic, you can use the `node()` accessor, which allow you to create a named node of any kind using a mapper function and <i>optionally</i> a default value.
+
+```ts
+const app = html`<div>
+	The number ${node('number', 2,
+		(n: number) => n % 2 === 0 ?
+			html`<i>${n} is even</i>` : 
+			html`<b>${n} is odd</i>`
+		)}.
+</div>`;
+
+// sets `data` to 5 and invokes the mapper to regenerate that portion of the element.
+app.data.number = 5;
 ```
 
 ---
