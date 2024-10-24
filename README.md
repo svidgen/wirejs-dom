@@ -392,14 +392,83 @@ document.body.appendChild(app);
 
 This is not alawys recommended. But, it's great for smaller, inlined, or otherwise self-contained components. It can often save on some of the maintenance overhead of creating a bigger or more complex component.
 
+### `document` Events
+
+You can monitor when an `html` element is added to or removed from the `document` like this:
+
+```ts
+const app = html`<div>My div</div>`
+	.onadd(() => console.log('added', app))
+	.onremove(() => console.log('removed', app))
+;
+```
+
+These methods also receive the element itself as a parameter for convenience when defining these handlers inline without an explicit variable to refer to.
+
+```ts
+const staticGreeting = (name: string) => html`<div>hello, ${name}.</div>`
+	.onadd(self => console.log(`greeting for ${name} added`, self))
+	.onremove(self => console.log(`greeting for ${name} removed`, self));
+```
+
+### Adding method and properties
+
+You can extend elements inline with the `extend()` method.
+
+```ts
+const app = html`<div>Hello, ${text('name', '___')}.</div>`
+	.extend(() => ({
+		setName(name: string) {
+			app.data.name = name;
+		}
+	}));
+
+document.body.append(app);
+app.setName('World');
+```
+
+And again, if you don't have a variable to refer to because you're building everything inline, `extend()` receives the element itself as a parameter.
+
+```ts
+const buildApp = () => html`<div>Hello, ${text('name', '___')}.</div>`
+	.extend((self) => ({
+		setName(name: string) {
+			self.data.name = name;
+		}
+	}));
+
+const app = buildApp();
+document.body.append(app);
+app.setName('World');
+```
+
+And finally, if you prefer not to pollute the element itself, you can nest your extensions any way you like:
+
+```ts
+const buildApp = () => html`<div>Hello, ${text('name', '___')}.</div>`
+	.extend((self) => ({
+		// these get merged into the existing `data` property
+		data: {
+			setName(name: string) {
+				self.data.name = name;
+			}
+		},
+
+		// these get tacked onto a new extensions property
+		debug: {
+			log() {
+				console.log('something about', self);
+			}
+		}
+	}));
+```
+
 ## High Level Backlog
 
 (In no particular order.)
 
 1. A good CSS / Styling mechanism
 1. Allow `text`, `attribute`, and `list` to be defined externally and injected N times
-1. Mechanism for adding methods to a component
-1. Mechanism for adding events to a component
 1. A good rehydration mechanism
 1. SSR+SSG with rehydration support
 1. Allow signal incorporation into `html`, `text`, `attribute`, and `list` tags?
