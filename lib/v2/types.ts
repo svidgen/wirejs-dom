@@ -72,7 +72,7 @@ export type html = <
 >(
 	raw: ReadonlyArray<string>,
 	...builders: T
-) => WithDomEvents<HTMLElement & { data: ElementBuildersToRecords<T> }>;
+) => WithExtensions<HTMLElement & { data: ElementBuildersToRecords<T> }>;
 
 export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
 
@@ -117,14 +117,14 @@ export type attribute = <
 		| [ value?: AttributeValue[], map?: (item: AttributeValue) => AttributeValue ]
 ) => ElementBuilder<ID, AttributeValue>;
 
-export type WithDomEvents<T extends Node> = T & {
+export type DomEvents<T extends Node> = {
 	/**
 	 * Invokes the callbacks when the node is added to the document.
 	 * 
 	 * @param callback
 	 * @returns 
 	 */
-	onadd: (callback: (self: T) => any) => WithDomEvents<T>;
+	onadd: (callback: (self: WithExtensions<T>) => any) => WithExtensions<T>;
 
 	/**
 	 * Invokes the callback when the node is removed from the document.
@@ -132,7 +132,15 @@ export type WithDomEvents<T extends Node> = T & {
 	 * @param callback
 	 * @returns 
 	 */
-	onremove: (callback: (self: T) => any) => WithDomEvents<T>;
+	onremove: (callback: (self: WithExtensions<T>) => any) => WithExtensions<T>;
 };
 
-export type addWatcherHooks = <T extends Node>(node: T) => asserts node is WithDomEvents<T>;
+export type Extend<T extends Node> = {
+	extend: <Extensions extends object>(
+		extender: ((self: WithExtensions<T>) => Extensions)
+	) => WithExtensions<T & Extensions>
+};
+
+export type WithExtensions<T extends Node> = KindaPretty<T & DomEvents<T> & Extend<T>>;
+
+export type addWatcherHooks = <T extends Node>(node: T) => asserts node is T & DomEvents<T>;

@@ -396,6 +396,7 @@ This is not alawys recommended. But, it's great for smaller, inlined, or otherwi
 
 (In no particular order.)
 
+1. A good CSS / Styling mechanism
 1. Allow `text`, `attribute`, and `list` to be defined externally and injected N times
 1. Mechanism for adding methods to a component
 1. Mechanism for adding events to a component

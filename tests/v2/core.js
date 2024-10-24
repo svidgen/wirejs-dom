@@ -145,6 +145,94 @@ QUnit.module("v2", () => {
 			assert.equal(await event, 'v', 'onadd() callback fired with expected value');
 		});
 
+		QUnit.test("can be extended with additional methods", async assert => {
+			const node = html`<div>Hello ${text('name', '___')}.</div>`.extend(self => ({
+				/**
+				 * This docstring should show up on the method also.
+				 * 
+				 * @param {string} newName 
+				 */
+				changeName(newName) {
+					self.data.name = newName.toLowerCase();
+				}
+			}));
+
+			node.changeName('WORLD');
+
+			assert.equal(
+				node.innerHTML,
+				"Hello world.",
+				"the markup matches expected"
+			);
+
+			assert.equal(
+				node.data.name,
+				"world",
+				"the data element is set correctly"
+			);
+		});
+
+		QUnit.test("can be extended with additional, merged nested methods", async assert => {
+			const node = html`<div>Hello ${text('name', '___')}.</div>`.extend(self => ({
+				data: {
+					/**
+					 * This docstring should show up on the method also.
+					 * 
+					 * @param {string} newName 
+					 */
+					changeName(newName) {
+						console.log({newName, self});
+						self.data.name = newName.toLowerCase();
+					}
+				}
+			}));
+
+			node.data.changeName('WORLD');
+
+			assert.equal(
+				node.innerHTML,
+				"Hello world.",
+				"the markup matches expected"
+			);
+
+			assert.equal(
+				node.data.name,
+				"world",
+				"the data element is set correctly"
+			);
+		});
+
+		QUnit.test("can be extended with additional nested methods on new props", async assert => {
+			const node = html`<div>Hello ${text('name', '___')}.</div>`.extend(self => ({
+				extensions: {
+					/**
+					 * This docstring should show up on the method also.
+					 * 
+					 * @param {string} newName 
+					 */
+					changeName(newName) {
+						console.log({newName, self});
+						self.data.name = newName.toLowerCase();
+					}
+				}
+			}));
+
+			node.extensions.changeName('WORLD');
+
+			assert.equal(
+				node.innerHTML,
+				"Hello world.",
+				"the markup matches expected"
+			);
+
+			assert.equal(
+				node.data.name,
+				"world",
+				"the data element is set correctly"
+			);
+		});
+
+
 		// TODO: function interpolation tests
 	});
 });
