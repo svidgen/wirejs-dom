@@ -1,12 +1,15 @@
 {
   "name": "wirejs-dom",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Ultralite web component and DOM manipulation library.",
   "main": "./lib/index.js",
   "type": "module",
   "exports": {
     ".": "./lib/index.js",
-    "./v2": "./lib/v2/index.js"
+    "./v2": {
+      "default": "./lib/v2/index.js",
+      "types": "./lib/v2/index.d.ts"
+    }
   },
   "directories": {
     "lib": "lib",
