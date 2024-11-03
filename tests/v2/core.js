@@ -47,8 +47,19 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("can contain interpolate other HTMLElements directly", assert => {
+		QUnit.test("can contain interpolate other html`` directly", assert => {
 			const child = html`<span>middle</span>`;
+			const parent = html`<div>before ${child} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before <span>middle</span> after",
+				"the parent markup contains the child"
+			);
+		});
+
+		QUnit.test("can contain interpolate other HTMLElements directly", assert => {
+			const child = document.createElement('span')
+			child.innerHTML = 'middle';
 			const parent = html`<div>before ${child} after</div>`;
 			assert.equal(
 				parent.innerHTML,
