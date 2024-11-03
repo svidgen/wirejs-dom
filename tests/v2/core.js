@@ -69,6 +69,26 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can contain a list of child strings directly", assert => {
+			const children = ['a', 'b', 'c'];
+			const parent = html`<div>before ${children} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before abc after",
+				"the parent markup contains the children"
+			);
+		});
+
+		QUnit.test("can contain a list of child html`` directly", assert => {
+			const children = ['a', 'b', 'c'].map(c => html`<span>${c}</span>`);
+			const parent = html`<div>before ${children} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before <span>a</span><span>b</span><span>c</span> after",
+				"the parent markup contains the children"
+			);
+		});
+
 		QUnit.test("has onadd() which fires on document insertion", async assert => {
 			const node = html`<div>
 				hey there world.
