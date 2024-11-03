@@ -89,6 +89,20 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can contain a list of child raw HTMLElement directly", assert => {
+			const children = ['a', 'b', 'c'].map(c => {
+				const el = document.createElement('span');
+				el.innerHTML = c;
+				return el;
+			});
+			const parent = html`<div>before ${children} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before <span>a</span><span>b</span><span>c</span> after",
+				"the parent markup contains the children"
+			);
+		});
+
 		QUnit.test("has onadd() which fires on document insertion", async assert => {
 			const node = html`<div>
 				hey there world.
