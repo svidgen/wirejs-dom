@@ -68,6 +68,16 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can contain interpolate html text directly", assert => {
+			const child = "middle <b>child</b>";
+			const parent = html`<div>before ${child} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before middle <b>child</b> after",
+				"the parent markup contains the child"
+			);
+		});
+
 		QUnit.test("trims leading and trailing whitespace around container", assert => {
 			const child = html`
 				<span>middle</span>
