@@ -1,5 +1,5 @@
 import { addWatcherHooks, registerNodeDomCallbacks } from '../../lib/v2/components/dom-events.js';
-import QUnit, { test } from 'qunit';
+import QUnit from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not
 // immediate. Hence, the async testing patterns.
@@ -11,7 +11,7 @@ async function sleep(ms = 1) {
 QUnit.module('v2', () => {
 	QUnit.module('dom-events', () => {
 		QUnit.module('registerNodeDomCallbacks()', () => {
-			test('does not fire callbacks on no-op', async assert => {
+			QUnit.test('does not fire callbacks on no-op', async assert => {
 				const node = document.createElement('div');
 
 				const event = new Promise(resolve => {
@@ -30,7 +30,7 @@ QUnit.module('v2', () => {
 				assert.equal(await event, 'unsleep', "neither callback fired prematurely");
 			});
 
-			test('fires onadd() on document insert', async assert => {
+			QUnit.test('fires onadd() on document insert', async assert => {
 				const node = document.createElement('div');
 
 				const event = new Promise((resolve, reject) => {
@@ -46,7 +46,7 @@ QUnit.module('v2', () => {
 				assert.equal(await event, 'onadd', 'onadd() callback fired');
 			});
 
-			test('fires onremove() on document removal', async assert => {
+			QUnit.test('fires onremove() on document removal', async assert => {
 				const node = document.createElement('div');
 
 				const event = new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ QUnit.module('v2', () => {
 		});
 
 		QUnit.module('addWatcherHooks()', () => {
-			test('provides onadd() that fires on document insert', async assert => {
+			QUnit.test('provides onadd() that fires on document insert', async assert => {
 				const node = document.createElement('div');
 				addWatcherHooks(node);
 
@@ -86,7 +86,7 @@ QUnit.module('v2', () => {
 				assert.equal(await event, 'onadd', 'onadd() callback fired');
 			});
 
-			test('provides onremove() that fires on document removal', async assert => {
+			QUnit.test('provides onremove() that fires on document removal', async assert => {
 				const node = document.createElement('div');
 				addWatcherHooks(node);
 
@@ -108,7 +108,7 @@ QUnit.module('v2', () => {
 				assert.equal(await event, 'onremove', 'onremove() callback fired');
 			});
 
-			test('is onadd().onremove() chainable', async assert => {
+			QUnit.test('is onadd().onremove() chainable', async assert => {
 				const node = document.createElement('div');
 				addWatcherHooks(node);
 
@@ -132,7 +132,7 @@ QUnit.module('v2', () => {
 				assert.equal(returnedNode, node, 'returned node is the original node');
 			});
 
-			test('is onremove().onadd() chainable', async assert => {
+			QUnit.test('is onremove().onadd() chainable', async assert => {
 				const node = document.createElement('div');
 				addWatcherHooks(node);
 
