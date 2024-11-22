@@ -47,6 +47,67 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can be a html element", assert => {
+			const t = html`<html attr='something'><head><title>title</title></head></html>`;
+			assert.equal(
+				t.tagName,
+				'HTML',
+				'tag name is preserved'
+			);
+			assert.equal(
+				t.outerHTML,
+				`<html attr="something"><head><title>title</title></head><body></body></html>`,
+				'outerHTML matches'
+			);
+		});
+
+		QUnit.test("can be a full html document with doctype", assert => {
+			const t = html`<!doctype html><html attr='something'><head><title>title</title></head></html>`;
+			assert.equal(
+				t.tagName,
+				'HTML',
+				'tag name is preserved'
+			);
+			assert.equal(
+				t.outerHTML,
+				`<html attr="something"><head><title>title</title></head><body></body></html>`,
+				'outerHTML matches'
+			);
+			assert.equal(
+				t.parentNode.doctype.name,
+				`html`,
+				"doctype matches"
+			);
+		});
+
+		QUnit.test("can be a head element", assert => {
+			const t = html`<head><title>title</title></head>`;
+			assert.equal(
+				t.tagName,
+				'HEAD',
+				'tag name is preserved'
+			);
+			assert.equal(
+				t.outerHTML,
+				'<head><title>title</title></head>',
+				'outerHTML matches'
+			);
+		});
+
+		QUnit.test("can be a body element", assert => {
+			const t = html`<body><p>stuff</p></body>`;
+			assert.equal(
+				t.tagName,
+				'BODY',
+				'tag name is preserved'
+			);
+			assert.equal(
+				t.outerHTML,
+				'<body><p>stuff</p></body>',
+				'outerHTML matches'
+			);
+		});
+
 		QUnit.test("can contain interpolate other html`` directly", assert => {
 			const child = html`<span>middle</span>`;
 			const parent = html`<div>before ${child} after</div>`;
@@ -68,12 +129,22 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("can contain interpolate html text directly", assert => {
+		QUnit.test("can contain interpolate html text directly - fragment", assert => {
 			const child = "middle <b>child</b>";
 			const parent = html`<div>before ${child} after</div>`;
 			assert.equal(
 				parent.innerHTML,
 				"before middle <b>child</b> after",
+				"the parent markup contains the child"
+			);
+		});
+
+		QUnit.test("can contain interpolate html text directly - single full node", assert => {
+			const child = "<p>middle <b>child</b></p>";
+			const parent = html`<div>before ${child} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before <p>middle <b>child</b></p> after",
 				"the parent markup contains the child"
 			);
 		});
