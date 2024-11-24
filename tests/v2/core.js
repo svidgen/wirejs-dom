@@ -358,7 +358,6 @@ QUnit.module("v2", () => {
 			);
 		});
 
-
 		// TODO: function interpolation tests
 	});
 });

@@ -405,6 +405,8 @@ QUnit.module("v2", () => {
 					"tag innerHTML matches"
 				);
 
+				console.log(t.outerHTML);
+
 				assert.deepEqual(
 					t.data.middle,
 					['d', 'b', 'a', 'c'],
