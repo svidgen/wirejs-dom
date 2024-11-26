@@ -1,4 +1,4 @@
-import { html, text } from '../../lib/v2/index.js';
+import { html, text, node } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not
@@ -20,6 +20,32 @@ function getDataFrom(rendered) {
 		const propName = name.substring(DATA_PREFIX.length);
 		if (propName) {
 			data[propName] = JSON.parse(rendered.getAttribute(name))
+		}
+	}
+	return data;
+}
+
+/**
+ * This would be used at "pickling" time; not at rehydration time.
+ * 
+ * I think what we should do is call something like this when `hydrate(...)`
+ * is called from a node context. This should cause it to crawl the `document` looking
+ * for matching nodes to attach `wirejs-data` properties to -- but only those necessary
+ * to satisfy the hydration.
+ * 
+ * When `hydration` is called from the client then, it's invocation should theoretically
+ * align with the server-side invocation, picking up nodes that have had `wirejs-data`
+ * properties attached to them.
+ * 
+ * @param {Element} node 
+ */
+function getDataTreeFromNode(node) {
+	const data = {};
+	for (const [k, v] of Object.entries(node.data)) {
+		if (v instanceof Node) {
+			data[k] = getDataTreeFromNode(v);
+		} else {
+			data[k] = v;
 		}
 	}
 	return data;
@@ -110,6 +136,24 @@ QUnit.module("v2", () => {
 				'<div wirejs-data-name="&quot;World&quot;">Hello, World!</div>',
 				'outerHTML matches'
 			);
+		});
+
+		QUnit.test("can extract data from nested named components", assert => {
+			const name = html`<div>${text('name', 'name placeholder')}</div>`;
+			const interjection = html`<div>${text(
+				'interjection',
+				'interjection placeholder'
+			)}</div>`;
+
+			const greeting = html`<div>
+				${node('nameChild', name)}
+				${node('interjectionChild', interjection)}
+			</div>`
+
+			// const data = getDataFrom(greeting);
+			// const nameChildData = getDataFrom(greeting.data.nameChild);
+			// console.log('nested component data', greeting.outerHTML, data, nameChildData);
+			console.log('tree of data', getDataTreeFromNode(greeting));
 		});
 
 		// what do we do with regular, interpolated values?
