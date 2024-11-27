@@ -8,21 +8,30 @@ async function sleep(ms = 1) {
 	return new Promise(unsleep => setTimeout(unsleep, ms));
 }
 
+// /**
+//  * 
+//  * @param {Element} rendered 
+//  */
+// function getDataFrom(rendered) {
+// 	const DATA_PREFIX = 'wirejs-data'
+// 	const data = {};
+// 	for (const name of rendered.getAttributeNames()) {
+// 		if (!name.startsWith(DATA_PREFIX)) continue;
+// 		const propName = name.substring(DATA_PREFIX.length);
+// 		if (propName) {
+// 			data[propName] = JSON.parse(rendered.getAttribute(name))
+// 		}
+// 	}
+// 	return data;
+// }
+
 /**
  * 
  * @param {Element} rendered 
+ * @returns 
  */
 function getDataFrom(rendered) {
-	const DATA_PREFIX = 'wirejs-data-'
-	const data = {};
-	for (const name of rendered.getAttributeNames()) {
-		if (!name.startsWith(DATA_PREFIX)) continue;
-		const propName = name.substring(DATA_PREFIX.length);
-		if (propName) {
-			data[propName] = JSON.parse(rendered.getAttribute(name))
-		}
-	}
-	return data;
+	return JSON.parse(rendered.getAttribute('wirejs-data'));
 }
 
 /**
@@ -39,16 +48,26 @@ function getDataFrom(rendered) {
  * 
  * @param {Element} node 
  */
-function getDataTreeFromNode(node) {
+function populateDataAttributes(node, isRoot = true) {
 	const data = {};
+
 	for (const [k, v] of Object.entries(node.data)) {
 		if (v instanceof Node) {
-			data[k] = getDataTreeFromNode(v);
+			data[k] = populateDataAttributes(v, false);
 		} else {
 			data[k] = v;
 		}
 	}
-	return data;
+
+	if (isRoot) {
+		try {
+			node.setAttribute('wirejs-data', JSON.stringify(data));
+		} catch {
+			console.error("Data for node could not be serialized.", node);
+		}
+	} else {
+		return data;
+	}
 }
 
 /**
@@ -139,21 +158,26 @@ QUnit.module("v2", () => {
 		});
 
 		QUnit.test("can extract data from nested named components", assert => {
-			const name = html`<div>${text('name', 'name placeholder')}</div>`;
-			const interjection = html`<div>${text(
+			const name = html`<span>
+				${text('name', 'name placeholder')}
+			</span>`;
+
+			const interjection = html`<span>${text(
 				'interjection',
 				'interjection placeholder'
-			)}</div>`;
+			)}</span>`;
+			interjection.data.interjection = 'Hello, ';
 
 			const greeting = html`<div>
-				${node('nameChild', name)}
 				${node('interjectionChild', interjection)}
-			</div>`
+				${node('nameChild', name)}
+			</div>`;
 
 			// const data = getDataFrom(greeting);
 			// const nameChildData = getDataFrom(greeting.data.nameChild);
 			// console.log('nested component data', greeting.outerHTML, data, nameChildData);
-			console.log('tree of data', getDataTreeFromNode(greeting));
+			populateDataAttributes(greeting);
+			console.log('greeting node', greeting);
 		});
 
 		// what do we do with regular, interpolated values?
