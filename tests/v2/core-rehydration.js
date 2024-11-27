@@ -72,12 +72,7 @@ function populateDataAttributes(node, isRoot = true) {
  */
 function hydrate(rendered, replacement) {
 	const renderedData = getDataFrom(rendered);
-	console.log({renderedData});
-
-	for (const [k, v] of Object.entries(renderedData)) {
-		replacement.data[k] = v;
-	}
-
+	replacement.data = renderedData;
 	if (rendered.parentNode) {
 		rendered.parentNode.replaceChild(replacement, rendered);
 	}
@@ -88,10 +83,11 @@ QUnit.module("v2", () => {
 
 		QUnit.test("serialize default text property values into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
+			populateDataAttributes(t);
 
 			assert.equal(
 				t.outerHTML,
-				'<div wirejs-data-name="&quot;person&quot;">Hello, person!</div>',
+				'<div wirejs-data="{&quot;name&quot;:&quot;person&quot;}">Hello, person!</div>',
 				'outerHTML matches'
 			);
 		});
@@ -99,14 +95,16 @@ QUnit.module("v2", () => {
 		QUnit.test("serialize text properties into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			t.data.name = 'World';
+			populateDataAttributes(t);
 
 			assert.equal(
 				t.outerHTML,
-				'<div wirejs-data-name="&quot;World&quot;">Hello, World!</div>',
+				'<div wirejs-data="{&quot;name&quot;:&quot;World&quot;}">Hello, World!</div>',
 				'outerHTML matches'
 			);
 		});
 
+		// TODO: do we need to do this?
 		// QUnit.test("serializes literal values into args attribute", assert => {
 		// 	const person = 'World';
 		// 	const t = html`<div>Hello, ${person}!</div>`;
@@ -121,13 +119,14 @@ QUnit.module("v2", () => {
 		QUnit.test("can hydrate a component with a matching data attribute", assert => {
 			const base = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			base.data.name = 'World';
+			populateDataAttributes(base);
 
 			const replacement = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			hydrate(base, replacement);
 
 			assert.equal(
 				replacement.outerHTML,
-				'<div wirejs-data-name="&quot;World&quot;">Hello, World!</div>',
+				'<div>Hello, World!</div>',
 				'outerHTML matches'
 			);
 		});
