@@ -1,30 +1,6 @@
 import { html, text, node } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
-// NOTE: The callbacks provided by the browser (and therefore this library) are not
-// immediate. Hence, the async testing patterns.
-
-async function sleep(ms = 1) {
-	return new Promise(unsleep => setTimeout(unsleep, ms));
-}
-
-// /**
-//  * 
-//  * @param {Element} rendered 
-//  */
-// function getDataFrom(rendered) {
-// 	const DATA_PREFIX = 'wirejs-data'
-// 	const data = {};
-// 	for (const name of rendered.getAttributeNames()) {
-// 		if (!name.startsWith(DATA_PREFIX)) continue;
-// 		const propName = name.substring(DATA_PREFIX.length);
-// 		if (propName) {
-// 			data[propName] = JSON.parse(rendered.getAttribute(name))
-// 		}
-// 	}
-// 	return data;
-// }
-
 /**
  * 
  * @param {Element} rendered 
@@ -145,7 +121,6 @@ QUnit.module("v2", () => {
 		QUnit.test("can hydrate a component with a matching data attribute", assert => {
 			const base = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			base.data.name = 'World';
-			const baseHtml = base.outerHTML;
 
 			const replacement = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			hydrate(base, replacement);
@@ -218,6 +193,16 @@ QUnit.module("v2", () => {
 			assert.equal(
 				copied.innerHTML,
 				`<span>Hello, </span><span>name placeholder</span>`
+			);
+
+			assert.equal(
+				copied.data.interjectionChild.data.interjection,
+				'Hello, '
+			);
+
+			assert.equal(
+				copied.data.nameChild.data.name,
+				'name placeholder'
 			);
 		});
 
