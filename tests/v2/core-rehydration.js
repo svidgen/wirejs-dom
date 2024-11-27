@@ -53,7 +53,7 @@ function populateDataAttributes(node, isRoot = true) {
 
 	for (const [k, v] of Object.entries(node.data)) {
 		if (v instanceof Node) {
-			data[k] = { data: populateDataAttributes(v, false) };
+			data[`$wirejs-data-${k}`] = populateDataAttributes(v, false);
 		} else {
 			data[k] = v;
 		}
@@ -176,20 +176,48 @@ QUnit.module("v2", () => {
 			populateDataAttributes(greeting);
 
 			assert.deepEqual(
-				JSON.parse(greeting.getAttribute('wirejs-data')),
+				getDataFrom(greeting),
 				{
-					interjectionChild: {
-						data: {
-							interjection: 'Hello, '
-						},
+					'$wirejs-data-interjectionChild': {
+						interjection: 'Hello, '
 					},
-					nameChild: {
-						data: {
-							name: 'name placeholder'
-						}
+					'$wirejs-data-nameChild': {
+						name: 'name placeholder'
 					}
 				},
 				"hydrated wirejs-data attribute matches expected"
+			);
+		});
+
+		QUnit.test("can hydrate new components based on DOM node data props", assert => {
+			function makeGreeting() {
+				const name = html`<span>${
+					text('name', 'name placeholder')
+				}</span>`;
+
+				const interjection = html`<span>${text(
+					'interjection',
+					'interjection placeholder'
+				)}</span>`;
+
+				return html`<div>${node(
+					'interjectionChild', interjection)
+				}${node(
+					'nameChild', name)
+				}</div>`;
+			}
+
+			const original = makeGreeting();
+			original.data.interjectionChild.data.interjection = 'Hello, ';
+
+			populateDataAttributes(original);
+
+			const copied = makeGreeting();
+			copied.data = getDataFrom(original);
+
+			assert.equal(
+				copied.innerHTML,
+				`<span>Hello, </span><span>name placeholder</span>`
 			);
 		});
 
