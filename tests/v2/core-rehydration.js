@@ -29,7 +29,7 @@ function populateDataAttributes(node, isRoot = true) {
 
 	for (const [k, v] of Object.entries(node.data)) {
 		if (v instanceof Node) {
-			data[`$wirejs-data-${k}`] = populateDataAttributes(v, false);
+			data[k] = { data: populateDataAttributes(v, false) };
 		} else {
 			data[k] = v;
 		}
@@ -152,11 +152,11 @@ QUnit.module("v2", () => {
 			assert.deepEqual(
 				getDataFrom(greeting),
 				{
-					'$wirejs-data-interjectionChild': {
-						interjection: 'Hello, '
+					'interjectionChild': {
+						data: { interjection: 'Hello, ' }
 					},
-					'$wirejs-data-nameChild': {
-						name: 'name placeholder'
+					'nameChild': {
+						data: { name: 'name placeholder' }
 					}
 				},
 				"hydrated wirejs-data attribute matches expected"
