@@ -31,7 +31,7 @@ async function sleep(ms = 1) {
  * @returns 
  */
 function getDataFrom(rendered) {
-	return JSON.parse(rendered.getAttribute('wirejs-data'));
+	return JSON.parse(rendered.getAttribute('wirejs-data') || {});
 }
 
 /**
@@ -53,7 +53,7 @@ function populateDataAttributes(node, isRoot = true) {
 
 	for (const [k, v] of Object.entries(node.data)) {
 		if (v instanceof Node) {
-			data[k] = populateDataAttributes(v, false);
+			data[k] = { data: populateDataAttributes(v, false) };
 		} else {
 			data[k] = v;
 		}
@@ -173,11 +173,24 @@ QUnit.module("v2", () => {
 				${node('nameChild', name)}
 			</div>`;
 
-			// const data = getDataFrom(greeting);
-			// const nameChildData = getDataFrom(greeting.data.nameChild);
-			// console.log('nested component data', greeting.outerHTML, data, nameChildData);
 			populateDataAttributes(greeting);
-			console.log('greeting node', greeting);
+
+			assert.deepEqual(
+				JSON.parse(greeting.getAttribute('wirejs-data')),
+				{
+					interjectionChild: {
+						data: {
+							interjection: 'Hello, '
+						},
+					},
+					nameChild: {
+						data: {
+							name: 'name placeholder'
+						}
+					}
+				},
+				"hydrated wirejs-data attribute matches expected"
+			);
 		});
 
 		// what do we do with regular, interpolated values?
