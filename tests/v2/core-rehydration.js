@@ -3,9 +3,9 @@ import {
 	text,
 	node,
 	hydrate,
+	dehydrate,
 } from '../../lib/v2/index.js';
 import {
-	populateDataAttributes,
 	getDataFrom
 } from '../../lib/v2/ss_.js';
 import QUnit from 'qunit';
@@ -19,7 +19,7 @@ QUnit.module("v2", () => {
 
 		QUnit.test("serialize default text property values into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
-			populateDataAttributes(t);
+			dehydrate(t);
 
 			assert.equal(
 				t.outerHTML,
@@ -31,7 +31,7 @@ QUnit.module("v2", () => {
 		QUnit.test("serialize text properties into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			t.data.name = 'World';
-			populateDataAttributes(t);
+			dehydrate(t);
 
 			assert.equal(
 				t.outerHTML,
@@ -55,7 +55,7 @@ QUnit.module("v2", () => {
 		QUnit.test("can hydrate a component with a matching data attribute", assert => {
 			const base = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			base.data.name = 'World';
-			populateDataAttributes(base);
+			dehydrate(base);
 
 			const replacement = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			hydrate(base, replacement);
@@ -83,7 +83,7 @@ QUnit.module("v2", () => {
 				${node('nameChild', name)}
 			</div>`;
 
-			populateDataAttributes(greeting);
+			dehydrate(greeting);
 
 			assert.deepEqual(
 				getDataFrom(greeting),
@@ -120,7 +120,7 @@ QUnit.module("v2", () => {
 			const original = makeGreeting();
 			original.data.interjectionChild.data.interjection = 'Hello, ';
 
-			populateDataAttributes(original);
+			dehydrate(original);
 
 			const copied = makeGreeting();
 			copied.data = getDataFrom(original);
@@ -139,6 +139,203 @@ QUnit.module("v2", () => {
 				copied.data.nameChild.data.name,
 				'name placeholder'
 			);
+		});
+
+		QUnit.test("can hydrate new components by `id` based on DOM node data props", assert => {
+			const DOM_ID = 'greeting-app-id';
+
+			function makeGreeting() {
+				const name = html`<span>${
+					text('name', 'name placeholder')
+				}</span>`;
+
+				const interjection = html`<span>${text(
+					'interjection',
+					'interjection placeholder'
+				)}</span>`;
+
+				return html`<div id='${DOM_ID}'>${node(
+					'interjectionChild', interjection)
+				}${node(
+					'nameChild', name)
+				}</div>`;
+			}
+
+			const original = makeGreeting();
+			original.data.interjectionChild.data.interjection = 'Hello, ';
+			document.body.appendChild(original);
+
+			dehydrate(original);
+
+			const copied = makeGreeting();
+			hydrate(DOM_ID, copied);
+
+			const hydrated = document.getElementById(DOM_ID);
+
+			assert.equal(
+				hydrated.innerHTML,
+				`<span>Hello, </span><span>name placeholder</span>`
+			);
+
+			assert.equal(
+				hydrated.data.interjectionChild.data.interjection,
+				'Hello, '
+			);
+
+			assert.equal(
+				hydrated.data.nameChild.data.name,
+				'name placeholder'
+			);
+
+			assert.equal(
+				copied,
+				hydrated,
+			);
+			
+			assert.notEqual(
+				hydrated,
+				original
+			)
+
+			hydrated.parentNode.removeChild(hydrated);
+		});
+
+		QUnit.test("`hydrate()` registers nodes when they're not yet in the DOM", assert => {
+			hydrate('non-existent-id', 'sentinel');
+
+			assert.deepEqual(
+				hydrate.pending.pop(),
+				{ id: 'non-existent-id', replacement: 'sentinel' }
+			);
+		});
+
+		QUnit.test("can hydrate using a function", assert => {
+			const DOM_ID = 'greeting-app-id';
+
+			function makeGreeting() {
+				const name = html`<span>${
+					text('name', 'name placeholder')
+				}</span>`;
+
+				const interjection = html`<span>${text(
+					'interjection',
+					'interjection placeholder'
+				)}</span>`;
+
+				return html`<div id='${DOM_ID}'>${node(
+					'interjectionChild', interjection)
+				}${node(
+					'nameChild', name)
+				}</div>`;
+			};
+
+			const original = makeGreeting();
+			original.data.interjectionChild.data.interjection = 'Hello, ';
+			document.body.appendChild(original);
+
+			dehydrate(original);
+
+			hydrate(DOM_ID, makeGreeting);
+
+			const hydrated = document.getElementById(DOM_ID);
+
+			assert.equal(
+				hydrated.innerHTML,
+				`<span>Hello, </span><span>name placeholder</span>`
+			);
+
+			assert.equal(
+				hydrated.data.interjectionChild.data.interjection,
+				'Hello, '
+			);
+
+			assert.equal(
+				hydrated.data.nameChild.data.name,
+				'name placeholder'
+			);
+
+			assert.notEqual(
+				hydrated,
+				original
+			);
+
+			hydrated.parentNode.removeChild(hydrated);
+		});
+
+		QUnit.test("hydration function receives data from existing node", assert => {
+			const DOM_ID = 'greeting-app-id';
+
+			function makeGreeting() {
+				const name = html`<span>${
+					text('name', 'name placeholder')
+				}</span>`;
+
+				const interjection = html`<span>${text(
+					'interjection',
+					'interjection placeholder'
+				)}</span>`;
+
+				return html`<div id='${DOM_ID}'>${node(
+					'interjectionChild', interjection)
+				}${node(
+					'nameChild', name)
+				}</div>`;
+			};
+
+			const original = makeGreeting();
+			original.data.interjectionChild.data.interjection = 'Hello, ';
+			document.body.appendChild(original);
+
+			dehydrate(original);
+
+			let params_seen;
+
+			hydrate(DOM_ID, params => {
+				params_seen = params;
+				return makeGreeting();
+			});
+
+			const hydrated = document.getElementById(DOM_ID);
+
+			assert.deepEqual(
+				params_seen,
+				{
+					data: {
+						interjectionChild: {
+						data: {
+							interjection: "Hello, "
+						}
+						},
+						nameChild: {
+							data: {
+								name: "name placeholder"
+							}
+						}
+					}
+				}
+			)
+
+			assert.equal(
+				hydrated.innerHTML,
+				`<span>Hello, </span><span>name placeholder</span>`
+			);
+
+			assert.equal(
+				hydrated.data.interjectionChild.data.interjection,
+				'Hello, '
+			);
+
+			assert.equal(
+				hydrated.data.nameChild.data.name,
+				'name placeholder'
+			);
+
+			assert.notEqual(
+				hydrated,
+				original
+			);
+
+			hydrated.parentNode.removeChild(hydrated);
 		});
 
 		// what do we do with regular, interpolated values?
