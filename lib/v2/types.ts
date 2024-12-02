@@ -144,3 +144,21 @@ export type Extend<T extends Node> = {
 export type WithExtensions<T extends Node> = KindaPretty<T & DomEvents<T> & Extend<T>>;
 
 export type addWatcherHooks = <T extends Node>(node: T) => asserts node is T & DomEvents<T>;
+
+export type useJSDOM = (JSDOM: object) => void;
+
+export type dehydrate = (node: Element, isRoot?: boolean) => object;
+
+export type pendingHydration = {
+	id: string;
+	replacement:
+		| (Element & { data: object })
+		| (() => Element & { data: object })
+}[];
+
+export type hydrate = (
+	rendered: Element | string,
+	replacement:
+		| (Element & { data: object })
+		| ((init: { data: object }) => (Element & { data: object }))
+) => void;

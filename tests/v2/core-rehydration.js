@@ -4,6 +4,7 @@ import {
 	node,
 	hydrate,
 	dehydrate,
+	pendingHydration,
 } from '../../lib/v2/index.js';
 import {
 	getDataFrom
@@ -204,7 +205,7 @@ QUnit.module("v2", () => {
 			hydrate('non-existent-id', 'sentinel');
 
 			assert.deepEqual(
-				hydrate.pending.pop(),
+				pendingHydration.pop(),
 				{ id: 'non-existent-id', replacement: 'sentinel' }
 			);
 		});
