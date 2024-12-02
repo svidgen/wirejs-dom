@@ -302,9 +302,9 @@ QUnit.module("v2", () => {
 				{
 					data: {
 						interjectionChild: {
-						data: {
-							interjection: "Hello, "
-						}
+							data: {
+								interjection: "Hello, "
+							}
 						},
 						nameChild: {
 							data: {
