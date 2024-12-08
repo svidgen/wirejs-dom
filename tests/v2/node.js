@@ -65,6 +65,33 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("set be set repeatedly", assert => {
+			const t = html`<div>before ${node(
+				'middle',
+				'default value',
+				/**
+				 * @param {string} v 
+				 */
+				(v) => html`<span>${v}</span>`)
+				} after</div>`;
+
+			t.data.middle = 'something else 1';
+			t.data.middle = 'something else 2';
+			t.data.middle = 'something else 3';
+
+			assert.equal(
+				t.innerHTML,
+				"before <span>something else 3</span> after",
+				"tag innerHTML matches"
+			);
+
+			assert.equal(
+				t.data.middle,
+				'something else 3',
+				"data property of the text node matches"
+			);
+		});
+
 		QUnit.test("can be conditional", assert => {
 			const t = html`<div>before ${node(
 				'middle',
