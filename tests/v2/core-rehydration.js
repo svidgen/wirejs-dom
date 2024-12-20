@@ -53,13 +53,13 @@ QUnit.module("v2", () => {
 		// 	);
 		// });
 
-		QUnit.test("can hydrate a component with a matching data attribute", assert => {
+		QUnit.test("can hydrate a component with a matching data attribute", async assert => {
 			const base = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			base.data.name = 'World';
 			dehydrate(base);
 
 			const replacement = html`<div>Hello, ${text('name', 'person')}!</div>`;
-			hydrate(base, replacement);
+			await hydrate(base, replacement);
 
 			assert.equal(
 				replacement.outerHTML,
@@ -142,7 +142,7 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("can hydrate new components by `id` based on DOM node data props", assert => {
+		QUnit.test("can hydrate new components by `id` based on DOM node data props", async assert => {
 			const DOM_ID = 'greeting-app-id';
 
 			function makeGreeting() {
@@ -169,7 +169,7 @@ QUnit.module("v2", () => {
 			dehydrate(original);
 
 			const copied = makeGreeting();
-			hydrate(DOM_ID, copied);
+			await hydrate(DOM_ID, copied);
 
 			const hydrated = document.getElementById(DOM_ID);
 
@@ -201,8 +201,8 @@ QUnit.module("v2", () => {
 			hydrated.parentNode.removeChild(hydrated);
 		});
 
-		QUnit.test("`hydrate()` registers nodes when they're not yet in the DOM", assert => {
-			hydrate('non-existent-id', 'sentinel');
+		QUnit.test("`hydrate()` registers nodes when they're not yet in the DOM", async assert => {
+			await hydrate('non-existent-id', 'sentinel');
 
 			assert.deepEqual(
 				pendingHydration.pop(),
@@ -210,7 +210,7 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("can hydrate using a function", assert => {
+		QUnit.test("can hydrate using a function", async assert => {
 			const DOM_ID = 'greeting-app-id';
 
 			function makeGreeting() {
@@ -236,7 +236,7 @@ QUnit.module("v2", () => {
 
 			dehydrate(original);
 
-			hydrate(DOM_ID, makeGreeting);
+			await hydrate(DOM_ID, makeGreeting);
 
 			const hydrated = document.getElementById(DOM_ID);
 
@@ -263,7 +263,7 @@ QUnit.module("v2", () => {
 			hydrated.parentNode.removeChild(hydrated);
 		});
 
-		QUnit.test("hydration function receives data from existing node", assert => {
+		QUnit.test("hydration function receives data from existing node", async assert => {
 			const DOM_ID = 'greeting-app-id';
 
 			function makeGreeting() {
@@ -291,7 +291,7 @@ QUnit.module("v2", () => {
 
 			let params_seen;
 
-			hydrate(DOM_ID, params => {
+			await hydrate(DOM_ID, params => {
 				params_seen = params;
 				return makeGreeting();
 			});
