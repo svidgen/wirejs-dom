@@ -215,5 +215,34 @@ QUnit.module("v2", () => {
 				"attribute data value is retained"
 			);
 		});
+
+		QUnit.test("responds to user input when no other element keys exist", assert => {
+			/**
+			 * WARNING: DO NOT ADD KEYS TO THIS ELEMENT!!!
+			 * 
+			 * This test protects against a bug that used to occur when an `attribute`
+			 * was the only/first `data` property listed in the element. In these cases,
+			 * the `data` property was not initialized prior to the `attribute` blessing,
+			 * which caused the blessing to point the attribute at an incorrect object.
+			 */
+			const node = html`<div>
+				before
+				<input
+					id='inputNode'
+					type='text'
+					name='something'
+					value=${attribute('inputValue', '')} />
+			</div>`;
+
+			const inputNode = node.querySelector('#inputNode');
+			inputNode.value = 'new value';
+			inputNode.oninput();
+
+			assert.equal(
+				node.data.inputValue,
+				'new value',
+				"the node's data property is updated to match"
+			)
+		});
 	});
 });
