@@ -1,3 +1,4 @@
+// @ts-check
 import { html, text } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
@@ -74,6 +75,7 @@ QUnit.module("v2", () => {
 				'outerHTML matches'
 			);
 			assert.equal(
+				// @ts-ignore
 				t.parentNode.doctype.name,
 				`html`,
 				"doctype matches"
@@ -149,6 +151,16 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can interpolate html directly without interfering with types", assert => {
+			const child = "<p>middle <b>child</b></p>";
+			const parent = html`<div>before ${child} after</div>`;
+			assert.equal(
+				parent.innerHTML,
+				"before <p>middle <b>child</b></p> after",
+				"the parent markup contains the child"
+			);
+		});
+
 		QUnit.test("trims leading and trailing whitespace around container", assert => {
 			const child = html`
 				<span>middle</span>
@@ -174,11 +186,18 @@ QUnit.module("v2", () => {
 		QUnit.test("can contain a list of child html`` directly", assert => {
 			const children = ['a', 'b', 'c'].map(c => html`<span>${c}</span>`);
 			const parent = html`<div>before ${children} after</div>`;
+
 			assert.equal(
 				parent.innerHTML,
 				"before <span>a</span><span>b</span><span>c</span> after",
 				"the parent markup contains the children"
 			);
+
+			assert.equal(
+				children[1].parentNode,
+				parent,
+				"the parent node contains the actual children (not copies)"
+			)
 		});
 
 		QUnit.test("can contain a list of child raw HTMLElement directly", assert => {

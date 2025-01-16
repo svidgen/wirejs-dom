@@ -54,11 +54,14 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 	: never;
 
 export type ElementBuildersToRecordTuple<T> = {
-	[K in keyof T]: T[K] extends ((...args: any[]) => any)
+	[K in keyof T
+		as T[K] extends (((...args: any[]) => any) | ElementBuilder<string, any>)
+		? K : never
+	]: T[K] extends ((...args: any[]) => any)
 		? object
 		: T[K] extends ElementBuilder<infer ID, infer DataType>
 		? Record<ID, DataType>
-		: object;
+		: never;
 };
 
 export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
@@ -67,7 +70,8 @@ export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
 
 export type html = <
 	T extends ReadonlyArray<
-		Record<string, any> | ((evt: Event) => any)
+		any
+		// Record<string, any> | ((evt: Event) => any)
 	>
 >(
 	raw: ReadonlyArray<string>,
@@ -81,8 +85,8 @@ export type textElementBuilder = <
 >(
 	id: ID,
 	...args:
-		| [ map?: (item: string) => string, value?: string[] ]
-		| [ value?: string[], map?: (item: string) => string ]
+		| [ map?: (item: string) => string, value?: string ]
+		| [ value?: string, map?: (item: string) => string ]
 ) => ElementBuilder<ID, string>; 
 
 export type list = <
