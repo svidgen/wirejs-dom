@@ -22,6 +22,22 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("can be created empty", assert => {
+			const t = html`<div>before ${node('middle')} after</div>`;
+
+			assert.equal(
+				t.innerHTML,
+				"before  after",
+				"tag innerHTML matches"
+			);
+
+			assert.equal(
+				t.data.middle,
+				undefined,
+				"data property of the text node matches"
+			);
+		});
+
 		QUnit.test("can have default values", assert => {
 			const t = html`<div>before ${node(
 				'middle', 'middle text', (v) => html`<span>${v}</span>`)
