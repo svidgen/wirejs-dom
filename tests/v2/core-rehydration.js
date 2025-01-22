@@ -253,11 +253,12 @@ QUnit.module("v2", () => {
 		});
 
 		QUnit.test("`hydrate()` registers nodes when they're not yet in the DOM", async assert => {
-			await hydrate('non-existent-id', 'sentinel');
+			globalThis.pendingDehydrations = [];
+			
+			await hydrate('non-existent-id', () => {});
 
-			assert.deepEqual(
-				pendingHydration.pop(),
-				{ id: 'non-existent-id', replacement: 'sentinel' }
+			assert.ok(
+				typeof globalThis.pendingDehydrations.pop() === 'function'
 			);
 		});
 
