@@ -66,13 +66,27 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("can dehydrate id()", assert => {
+		QUnit.test("uses empty data object for id() hydration", assert => {
 			const t = html`<div>Hello, <span ${id('name')}>person</span>!</div>`;
 			dehydrate(t);
 	
 			assert.equal(
 				t.outerHTML,
 				'<div wirejs-data=\"{&quot;name&quot;:{&quot;data&quot;:{}}}\">Hello, <span data-id=\"name\">person</span>!</div>',
+				'outerHTML matches'
+			);
+		});
+
+		QUnit.test("essentially ignores id() during rehydration", async assert => {
+			const base = html`<div>Hello, <span ${id('name')}>person</span>!</div>`;
+			dehydrate(base);
+
+			const replacement = html`<div>Hello, <span ${id('name')}>person</span>!</div>`;
+			await hydrate(base, replacement);
+	
+			assert.equal(
+				replacement.outerHTML,
+				'<div>Hello, <span data-id=\"name\">person</span>!</div>',
 				'outerHTML matches'
 			);
 		});
