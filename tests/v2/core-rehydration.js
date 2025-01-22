@@ -1,7 +1,8 @@
 import {
 	html,
-	text,
+	id,
 	node,
+	text,
 	hydrate,
 	dehydrate,
 	pendingHydration,
@@ -18,7 +19,7 @@ import QUnit from 'qunit';
 QUnit.module("v2", () => {
 	QUnit.module('html`` rehydration engine', () => {
 
-		QUnit.test("serialize default text property values into attributes", assert => {
+		QUnit.test("can dehydrate default text property values into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			dehydrate(t);
 
@@ -29,7 +30,7 @@ QUnit.module("v2", () => {
 			);
 		});
 
-		QUnit.test("serialize text properties into attributes", assert => {
+		QUnit.test("can dehydrate text properties into attributes", assert => {
 			const t = html`<div>Hello, ${text('name', 'person')}!</div>`;
 			t.data.name = 'World';
 			dehydrate(t);
@@ -40,6 +41,42 @@ QUnit.module("v2", () => {
 				'outerHTML matches'
 			);
 		});
+
+		QUnit.test("can dehydrate empty node()", assert => {
+			const t = html`<div>Hello, ${node('name')}!</div>`;
+			dehydrate(t);
+	
+			assert.equal(
+				t.outerHTML,
+				'<div wirejs-data="{}">Hello, !</div>',
+				'outerHTML matches'
+			);
+		});
+
+		QUnit.test("can dehydrate nested node()", assert => {
+			const grandchild = html`<div>grandchild</div>`;
+			const child = html`<div>${node('grandchild', grandchild)}</div>`;
+			const t = html`<div>Hello, ${node('child', child)}!</div>`;
+			dehydrate(t);
+	
+			assert.equal(
+				t.outerHTML,
+				'<div wirejs-data=\"{&quot;child&quot;:{&quot;data&quot;:{&quot;grandchild&quot;:{&quot;data&quot;:{}}}}}\">Hello, <div><div>grandchild</div></div>!</div>',
+				'outerHTML matches'
+			);
+		});
+
+		QUnit.test("can dehydrate id()", assert => {
+			const t = html`<div>Hello, <span ${id('name')}>person</span>!</div>`;
+			dehydrate(t);
+	
+			assert.equal(
+				t.outerHTML,
+				'<div wirejs-data=\"{&quot;name&quot;:{&quot;data&quot;:{}}}\">Hello, <span data-id=\"name\">person</span>!</div>',
+				'outerHTML matches'
+			);
+		});
+
 
 		// TODO: do we need to do this?
 		// QUnit.test("serializes literal values into args attribute", assert => {
