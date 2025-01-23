@@ -113,6 +113,7 @@ QUnit.module("v2", () => {
 		QUnit.test("can contain interpolate other html`` directly", assert => {
 			const child = html`<span>middle</span>`;
 			const parent = html`<div>before ${child} after</div>`;
+
 			assert.equal(
 				parent.innerHTML,
 				"before <span>middle</span> after",
@@ -153,7 +154,49 @@ QUnit.module("v2", () => {
 
 		QUnit.test("can interpolate html directly without interfering with types", assert => {
 			const child = "<p>middle <b>child</b></p>";
-			const parent = html`<div>before ${child} after</div>`;
+			const parent = html`<div>${text('beforeText', 'before')} ${child} ${text('afterText', 'after')}</div>`;
+
+			// @ts-expect-error
+			const _test = parent.data.nonexistent;
+
+			assert.equal(
+				parent.data.beforeText,
+				"before",
+				"before text matches"
+			);
+
+			assert.equal(
+				parent.data.afterText,
+				"after",
+				"before text matches"
+			);
+
+			assert.equal(
+				parent.innerHTML,
+				"before <p>middle <b>child</b></p> after",
+				"the parent markup contains the child"
+			);
+		});
+
+		QUnit.test("can interpolate html`` directly without interfering with types", assert => {
+			const child = html`<p>middle <b>child</b></p>`;
+			const parent = html`<div>${text('beforeText', 'before')} ${child} ${text('afterText', 'after')}</div>`;
+
+			// @ts-expect-error
+			const _test = parent.data.nonexistent;
+
+			assert.equal(
+				parent.data.beforeText,
+				"before",
+				"before text matches"
+			);
+
+			assert.equal(
+				parent.data.afterText,
+				"after",
+				"before text matches"
+			);
+
 			assert.equal(
 				parent.innerHTML,
 				"before <p>middle <b>child</b></p> after",

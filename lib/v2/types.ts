@@ -11,13 +11,16 @@ export type ElementContext = {
 	container: HTMLElement;
 };
 
+const __dataType = Symbol('__dataType');
+const __renderedType = Symbol('_renderedType');
+
 export type ElementBuilder<
-	ID extends string,
+	ID extends string | undefined,
 	DataType,
 	RenderedType = DataType
 > = {
 	toString: () => string;
-	id?: ID;
+	id: ID;
 	bless?: (context: ElementContext) => void;
 
 	/**
@@ -25,15 +28,17 @@ export type ElementBuilder<
 	 *
 	 * Just used to smuggle the type through.
 	 */
-	__dataType?: DataType;
+	[__dataType]: DataType;
 
 	/**
 	 * @deprecated
 	 *
 	 * Just used to smuggle the type through.
 	 */
-	__renderedType?: RenderedType;
+	[__renderedType]: RenderedType;
 };
+
+
 
 export type KindaPretty<T> = T extends (...args: any) => any
 	? T
@@ -53,19 +58,20 @@ export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) ex
 	? I
 	: never;
 
-export type ElementBuildersToRecordTuple<T> = {
+export type ElementBuildersToRecordTuple<T extends ReadonlyArray<any>> = {
 	[K in keyof T
-		as T[K] extends (((...args: any[]) => any) | ElementBuilder<string, any>)
-		? K : never
-	]: T[K] extends ((...args: any[]) => any)
-		? object
-		: T[K] extends ElementBuilder<infer ID, infer DataType>
-		? Record<ID, DataType>
+		as T[K] extends ElementBuilder<string, any, any>
+		? K
+		: never
+	]: T[K] extends ElementBuilder<infer ID, infer DataType, any>
+		? ID extends string ? Record<ID, DataType> : never
 		: never;
 };
 
 export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
-	? KindaPretty<UnionToIntersection<ElementBuildersToRecordTuple<T>[number]>>
+	? KindaPretty<UnionToIntersection<ElementBuildersToRecordTuple<T>[
+		keyof ElementBuildersToRecordTuple<T>
+	]>>
 	: never;
 
 export type html = <
