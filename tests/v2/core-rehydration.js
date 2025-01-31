@@ -4,8 +4,7 @@ import {
 	node,
 	text,
 	hydrate,
-	dehydrate,
-	pendingHydration,
+	dehydrate
 } from '../../lib/v2/index.js';
 import {
 	getDataFrom
