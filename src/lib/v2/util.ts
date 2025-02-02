@@ -59,5 +59,5 @@ export function setAttributeUnder(root: Element, id: string, value: any) {
 }
 
 export function isPromise<RT>(o: unknown): o is Promise<RT> {
-    return !!o && typeof o['then'] === 'function';
+    return !!o && typeof o === 'object' && 'then' in o && typeof o.then === 'function';
 }

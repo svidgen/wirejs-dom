@@ -39,11 +39,11 @@ export function attribute<
 			attr.value = '';
 
 			let innerValue = initialValue;
-			node[attrName] = map(innerValue);
+			(node as any)[attrName] = map(innerValue);
 
 			function doSet(value: RT) {
 				innerValue = value;
-				node[attrName] = map(value);
+				(node as any)[attrName] = map(value);
 			}
 
 			//
@@ -61,10 +61,10 @@ export function attribute<
 			if (
 				node.tagName === 'INPUT'
 				&& attrName === 'value'
-				&& typeof node['oninput'] !== 'function'
+				&& typeof (node as any)['oninput'] !== 'function'
 			) {
-				node['oninput'] = () => {
-					context.data[id] = map(node[attrName]);
+				(node as any)['oninput'] = () => {
+					context.data[id] = map((node as any)[attrName]);
 				};
 			}
 

@@ -1,4 +1,5 @@
-import { signal, reactive, computed } from '../../lib/v2/index.js';
+// import { signal, reactive, computed } from '../../lib/v2/index.js';
+import { signal, reactive, computed } from '../../src/lib/v2/signals/index.js';
 import QUnit from 'qunit';
 
 QUnit.module("v2", () => {

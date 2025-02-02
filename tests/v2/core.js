@@ -1,5 +1,5 @@
 // @ts-check
-import { html, text } from '../../src/lib/v2/v2/index.js';
+import { html, text } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not

@@ -162,7 +162,7 @@ export function list<ID extends string, InputType = string>(
 			const proxy = new Proxy(items, {
 				get(target, propName, receiver) {
 					if (overrides.hasOwnProperty(propName)) {
-						return overrides[propName];
+						return (overrides as any)[propName];
 					} else {
 						return Reflect.get(target, propName, receiver);
 					}

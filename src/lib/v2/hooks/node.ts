@@ -36,7 +36,7 @@ export function node<
 		id,
 		toString: () => `<ph data-id=${sentinelId}></ph>`,
 		bless: (context) => {
-			let innerValue: InputType | undefined = initialValue;
+			let innerValue: InputType = initialValue;
 
 			let node = map(innerValue);
 			const placeHolder = context.container.querySelector(`[data-id="${sentinelId}"]`)!;
@@ -49,14 +49,11 @@ export function node<
 			}
 
 			return {
-				/**
-				 * @returns {InputType}
-				 */
-				get() {
+				get(): InputType {
 					return innerValue;
 				},
-				set(value?: InputType | Promise<InputType | undefined>) {
-					if (isPromise<InputType | undefined>(value)) {
+				set(value: InputType | Promise<InputType>) {
+					if (isPromise<InputType>(value)) {
 						value.then(v => {
 							innerValue = v;
 							setValue(v);

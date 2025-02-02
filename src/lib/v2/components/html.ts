@@ -38,7 +38,7 @@ export function html<T extends ReadonlyArray<unknown>>(
 				toString() { return `<ph data-id=${phId}></ph>`; },
 				bless(ctx: ElementContext) {
 					const ph = ctx.container.querySelector(`[data-id="${phId}"]`)!;
-					b.forEach(_b => b instanceof Node
+					b.forEach(_b => _b instanceof Node
 						? ph.parentNode?.insertBefore(_b, ph)
 						: ph.parentNode?.insertBefore(document.createTextNode(String(_b)), ph)
 					);
@@ -76,6 +76,8 @@ export function html<T extends ReadonlyArray<unknown>>(
 
 	for (const builder of adjustedBuilders) {
 		if (!builder) continue;
+		if (typeof builder !== 'object') continue;
+
 		let accessor: Accessor<any> | undefined = undefined;
 
 		if ('handler' in builder && typeof builder.handler === 'function') {
@@ -84,6 +86,7 @@ export function html<T extends ReadonlyArray<unknown>>(
 			const fAttr = getAttributeUnder(node, builder.id);
 			const el = fAttr?.ownerElement
 			el?.removeAttribute(fAttr!.name);
+			// @ts-ignore
 			el && (el[fAttr!.name] = builder.handler);
 		}
 
@@ -108,7 +111,7 @@ export function html<T extends ReadonlyArray<unknown>>(
 const knownAccessors = new WeakMap<object, Record<string, Accessor<any>[]>>();
 
 function appendAccessor(
-	node: HTMLElement & {data: object},
+	node: HTMLElement & {data: Record<string, unknown>},
 	propName: string,
 	accessor?: Accessor<any>
 ) {
@@ -173,7 +176,10 @@ function addExtends(target: object) {
 	}
 }
 
-function mergeExtensionsIn(target: object, extensions: object) {
+function mergeExtensionsIn(
+	target: Record<string, any>,
+	extensions: Record<string, any>
+) {
 	for (const [k, v] of Object.entries(extensions)) {
 		if (k in target) {
 			// recursively merge properties in if `k` already exists on the target.

@@ -1,3 +1,5 @@
+import { isPromise } from "./util.js";
+
 // Functions used to support SSR, SSG, and related functions such as building
 // "DOM" nodes in a non-browser environment. (E.g., `useJSDOM()`)
 
@@ -47,7 +49,7 @@ export function getDataFrom(rendered: HTMLElement) {
  * attribute of the element for later rehydration.
  */
 export function dehydrate(node: HTMLElement & { data?: object }, isRoot = true) {
-	const data = {};
+	const data = {} as Record<string, any>;
 
 	for (const [k, v] of Object.entries(node.data || {})) {
 		if (v instanceof HTMLElement) {
@@ -94,7 +96,7 @@ export function dehydrate(node: HTMLElement & { data?: object }, isRoot = true) 
  * be found using `getElementById`.
  */
 export function hydrate(
-	rendered: Element | string,
+	rendered: HTMLElement | string,
 	replacement:
 		| ((Element | HTMLElement | Node) & { data: object })
 		| ((init: { data: object }) => ((Element | HTMLElement | Node) & { data: object }))
@@ -106,7 +108,9 @@ export function hydrate(
 		: rendered;
 
 	if (!renderedNode) {
+		// @ts-ignore
 		globalThis.pendingDehydrations = globalThis.pendingDehydrations || [];
+		// @ts-ignore
 		globalThis.pendingDehydrations.push((doc: any) => {
 			// remember, `rendered` is the `id` here:
 			const element = doc.parentNode?.getElementById(rendered)
@@ -125,7 +129,7 @@ export function hydrate(
 		: replacement
 	);
 
-	if (typeof replacementNodeOrPromise['then'] === 'function') {
+	if (isPromise(replacementNodeOrPromise)) {
 		replacementNodeOrPromise['then'](replacementNode => {
 			replacementNode.data = renderedData;
 			if (renderedNode.parentNode) {

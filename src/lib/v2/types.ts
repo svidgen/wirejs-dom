@@ -29,7 +29,7 @@ export type ElementBuilder<
 > = {
 	toString: () => string;
 	id: ID;
-	bless?: (context: ElementContext) => Accessor<DataType>;
+	bless?: (context: ElementContext) => Accessor<DataType> | undefined;
 
 	/**
 	 * @deprecated
