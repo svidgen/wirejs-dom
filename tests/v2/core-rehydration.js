@@ -5,10 +5,10 @@ import {
 	text,
 	hydrate,
 	dehydrate
-} from '../../lib/v2/index.js';
+} from '../../src/lib/v2/v2/index.js';
 import {
 	getDataFrom
-} from '../../lib/v2/ss_.js';
+} from '../../src/lib/v2/v2/ss_.js';
 import QUnit from 'qunit';
 
 // NOTE: The formatting of the HTML in this file is generally optimized for ease

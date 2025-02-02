@@ -3,8 +3,6 @@
  * 
  * Will only contain numbers and underscores, and so be used directly
  * for attributes without quotes, if needed.
- * 
- * @returns {string}
  */
 export function randomId() {
     return `${new Date().getTime()}_${Math.floor(Math.random() * 1000000)}`;
@@ -14,12 +12,8 @@ export function randomId() {
  * Finds the attribute on a node containing the `id` string.
  * 
  * Returns `null` if there is no match.
- *
- * @param {Element} node 
- * @param {string} id 
- * @returns 
  */
-export function matchingAttribute(node, id) {
+export function matchingAttribute(node: Element, id: string) {
     for (const attribute of node.attributes) {
         if (attribute.value === id) return attribute;
     }
@@ -31,15 +25,8 @@ export function matchingAttribute(node, id) {
  * under the given `root` Node.
  *
  * Returns `undefined` if there is no match.
- *
- * @param {Element} root 
- * @param {string} id 
- * @returns {Attr}
  */
-export function getAttributeUnder(root, id) {
-    /**
-     * @type {Element[]}
-     */
+export function getAttributeUnder(root: Element, id: string) {
     const q = [root];
 
     // theoretically no need for visit tracking,
@@ -62,15 +49,15 @@ export function getAttributeUnder(root, id) {
 /**
  * Finds the attribute at or under the given `root` matching the
  * given `id` and sets its value to the given `value`.
- *
- * @param {Element} root 
- * @param {string} id 
- * @param {any} value 
  */
-export function setAttributeUnder(root, id, value) {
+export function setAttributeUnder(root: Element, id: string, value: any) {
     const attribute = getAttributeUnder(root, id);
     if (attribute) {
         attribute.value = value;
         return attribute;
     }
+}
+
+export function isPromise<RT>(o: unknown): o is Promise<RT> {
+    return !!o && typeof o['then'] === 'function';
 }

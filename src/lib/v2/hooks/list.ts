@@ -1,24 +1,23 @@
+import { __dataType, __renderedType } from '../internals.js';
+import { ElementBuilder } from '../types.js';
 import { html } from '../components/html.js';
-import { randomId } from '../util.js';
+import { randomId, isPromise } from '../util.js';
 
-/**
- * 
- * @param {Node} newNode 
- * @param {Node} afterNode 
- */
-function insertAfter(newNode, afterNode) {
-	return afterNode.parentNode.insertBefore(newNode, afterNode.nextSibling);
+function insertAfter(newNode: Node, afterNode: Node) {
+	return afterNode.parentNode?.insertBefore(newNode, afterNode.nextSibling);
 }
 
-
-/**
- * @type {import('../types.ts').list}
- */
-export function list(id, mapperOrDataA, mapperOrDataB) {
+export function list<ID extends string, InputType = string>(
+	id: ID,
+	...args:
+		| [ map?: (item: InputType) => any, data?: InputType[] ]
+		| [ data?: InputType[], map?: (item: InputType) => any ]
+): ElementBuilder<ID, InputType[]> {
+	const [mapperOrDataA, mapperOrDataB] = args;
 	const map =
 		typeof mapperOrDataA === 'function' ? mapperOrDataA :
 		typeof mapperOrDataB === 'function' ? mapperOrDataB :
-		item => html`<div>${item}</div>`
+		(item: unknown) => html`<div>${item}</div>`
 	;
 
 	const initialItems =
@@ -33,45 +32,34 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 		id,
 		toString: () => `<placeholder data-id=${sentinelId} style='display: none;'></placeholder>`,
 		bless: (context) => {
-			/**
-			 * @type {Node[]}
-			 */
-			const nodes = [];
-
-			/**
-			 * @type {InputType[]}
-			 */
-			const items = [];
+			const nodes: Node[] = [];
+			const items: InputType[] = [];
 
 			// replace placeholder with empty start/end marker nodes for easy
 			// management with insertAfter/insertBefore operations.
-			const placeholder = context.container.querySelector(`[data-id="${sentinelId}"]`);
+			const placeholder = context.container.querySelector(`[data-id="${sentinelId}"]`)!;
 			const startMarker = document.createTextNode('');
 			insertAfter(startMarker, placeholder);
 			const endMarker = document.createTextNode('');
 			insertAfter(endMarker, startMarker);
-			placeholder.parentNode.removeChild(placeholder);
+			placeholder.parentNode?.removeChild(placeholder);
 
 			/**
 			 * Removes the node from the DOM.
-			 * 
-			 * @param {Node} node
 			 */
-			function removeNode(node) {
+			function removeNode(node: Node) {
 				return node?.parentNode?.removeChild(node);
 			}
 
 			/**
 			 * Clears and re-inserts all `nodes`.
-			 * 
-			 * @param {Node[]} nodes 
 			 */
 			function refresh() {
 				while (startMarker.nextSibling !== endMarker) {
-					startMarker.parentNode.removeChild(startMarker.nextSibling);
+					startMarker.parentNode?.removeChild(startMarker.nextSibling!);
 				}
 
-				let tail = startMarker;
+				let tail: Node = startMarker;
 				for (const node of nodes) {
 					if (tail) {
 						insertAfter(node, tail);
@@ -81,10 +69,10 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 			}
 
 			const overrides = {
-				push(...newItems) {
+				push(...newItems: InputType[]) {
 					for (const item of newItems) {
 						const node = map(item);
-						endMarker.parentNode.insertBefore(node, endMarker);
+						endMarker.parentNode?.insertBefore(node, endMarker);
 						items.push(item);
 						nodes.push(node);
 					}
@@ -94,38 +82,29 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 				pop() {
 					const poppedItem = items.pop();
 					const poppedNode = nodes.pop();
-					removeNode(poppedNode);
+					poppedNode && removeNode(poppedNode);
 					return poppedItem;
 				},
 
 				shift() {
 					const removedItem = items.shift();
 					const removedNode = nodes.shift();
-					removeNode(removedNode);
+					removedNode && removeNode(removedNode);
 					return removedItem;
 				},
 
-				/**
-				 * @param  {...any} items 
-				 */
-				unshift(...newItems) {
-					/** @type {Node[]} */
-					const newNodes = [];
+				unshift(...newItems: InputType[]) {
+					const newNodes: Node[] = [];
 					for (const item of [...newItems].reverse()) {
 						const node = map(item);
-						newNodes.push(item);
+						newNodes.push(node);
 						insertAfter(node, startMarker);
 					}
 					nodes.unshift(...newNodes);
 					return items.unshift(...newItems);
 				},
 
-				/**
-				 * @param {number} start
-				 * @param {number} deleteCount
-				 * @param {...object} items 
-				 */
-				splice(start, deleteCount, ...newItems) {
+				splice(start: number, deleteCount: number, ...newItems: InputType[]) {
 					//
 					// simple, naive implementation for now. there are a lot of cases to
 					// account for otherwise, especially since callers could splice into
@@ -151,11 +130,7 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 					return removedItems;
 				},
 
-				/**
-				 * 
-				 * @param {(object, object) => number} comparer 
-				 */
-				sort(comparer) {
+				sort(comparer: (a: InputType, b: InputType) => number) {
 					//
 					// AFAIK, there is no "organic" way to track sorting. long term: we'll create
 					// an array of the indexes of the `items` collection. we can sort that
@@ -176,7 +151,7 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 					return proxy;
 				},
 
-				reverse() {
+				reverse(): InputType[] {
 					nodes.reverse();
 					refresh();
 					items.reverse();
@@ -192,19 +167,21 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 						return Reflect.get(target, propName, receiver);
 					}
 				},
-				set(target, propName, value, receiver) {
+				set(target, propName: string, value, receiver) {
 					if (Number.isNaN(parseInt(propName))) {
 						Reflect.set(target, propName, value, receiver);
 					} else {
-						return overrides.splice(parseInt(propName), 1, value);
+						overrides.splice(parseInt(propName), 1, value);
 					}
+					return true;
 				},
-				deleteProperty(target, propName) {
+				deleteProperty(target, propName: string) {
 					if (Number.isNaN(parseInt(propName))) {
 						Reflect.deleteProperty(target, propName);
 					} else {
-						overrides.splice(propName, 1);
+						overrides.splice(parseInt(propName), 1);
 					}
+					return true;
 				}
 			});
 
@@ -214,10 +191,10 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 				get() {
 					return proxy;
 				},
-				set(newItems) {
+				set(newItems: InputType[]) {
 					proxy.splice(0);
 
-					if (typeof newItems?.then === 'function') {
+					if (isPromise<InputType[]>(newItems)) {
 						newItems.then(v => proxy.push(...v));
 					} else {
 						proxy.push(...newItems);
@@ -225,5 +202,7 @@ export function list(id, mapperOrDataA, mapperOrDataB) {
 				},
 			};
 		},
+		[__dataType]: {} as InputType[],
+		[__renderedType]: {} as InputType[]
 	};
 }

@@ -17,10 +17,8 @@
  * // you can then continue to use wirejs-dom
  * const widget = html`<div>do your thing</div>`;
  * ```
- * 
- * @type {import('./types').useJSDOM} 
  */
-export function useJSDOM(JSDOM) {
+export function useJSDOM(JSDOM: any) {
     if (global.window) return;
 
     const DOM = new JSDOM('<!doctype html><html><body></body></html>', {
@@ -39,25 +37,20 @@ export function useJSDOM(JSDOM) {
 /**
  * Extracts and parses the serialized data on the `wirejs-data` attribute
  * of the given Element.
- *
- * @param {Element} rendered 
- * @returns {object}
  */
-export function getDataFrom(rendered) {
-	return JSON.parse(rendered.getAttribute('wirejs-data') || {});
+export function getDataFrom(rendered: HTMLElement) {
+	return JSON.parse(rendered.getAttribute('wirejs-data') || '{}');
 }
 
 /**
  * Serializes the `data` tree of the given element and sets the `wirejs-data`
  * attribute of the element for later rehydration.
- * 
- * @type {import('./types').dehydrate}
  */
-export function dehydrate(node, isRoot = true) {
+export function dehydrate(node: HTMLElement & { data?: object }, isRoot = true) {
 	const data = {};
 
 	for (const [k, v] of Object.entries(node.data || {})) {
-		if (v instanceof Node) {
+		if (v instanceof HTMLElement) {
 			data[k] = { data: dehydrate(v, false) };
 		} else {
 			data[k] = v;
@@ -99,10 +92,14 @@ export function dehydrate(node, isRoot = true) {
  *
  * If `rendered` is a string, it will be treated like an `id`. The element will
  * be found using `getElementById`.
- *
- * @type {import('./types').hydrate}
  */
-export function hydrate(rendered, replacement) {
+export function hydrate(
+	rendered: Element | string,
+	replacement:
+		| ((Element | HTMLElement | Node) & { data: object })
+		| ((init: { data: object }) => ((Element | HTMLElement | Node) & { data: object }))
+		| ((init: { data: object }) => Promise<((Element | HTMLElement | Node) & { data: object })>)
+) {
 	const renderedNode = 
 		typeof rendered === 'string'
 		? document.getElementById(rendered)
@@ -110,9 +107,9 @@ export function hydrate(rendered, replacement) {
 
 	if (!renderedNode) {
 		globalThis.pendingDehydrations = globalThis.pendingDehydrations || [];
-		globalThis.pendingDehydrations.push(doc => {
+		globalThis.pendingDehydrations.push((doc: any) => {
 			// remember, `rendered` is the `id` here:
-			const element = doc.parentNode.getElementById(rendered)
+			const element = doc.parentNode?.getElementById(rendered)
 			if (element) {
 				dehydrate(element);
 			}
@@ -128,17 +125,20 @@ export function hydrate(rendered, replacement) {
 		: replacement
 	);
 
-	if (typeof replacementNodeOrPromise.then === 'function') {
-		replacementNodeOrPromise.then(replacementNode => {
+	if (typeof replacementNodeOrPromise['then'] === 'function') {
+		replacementNodeOrPromise['then'](replacementNode => {
 			replacementNode.data = renderedData;
 			if (renderedNode.parentNode) {
 				renderedNode.parentNode.replaceChild(replacementNode, renderedNode);
 			}
 		})
 	} else {
-		replacementNodeOrPromise.data = renderedData;
+		replacementNodeOrPromise['data'] = renderedData;
 		if (renderedNode.parentNode) {
-			renderedNode.parentNode.replaceChild(replacementNodeOrPromise, renderedNode);
+			renderedNode.parentNode.replaceChild(
+				replacementNodeOrPromise as Node,
+				renderedNode
+			);
 		}
 	}
 };

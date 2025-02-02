@@ -1,29 +1,18 @@
-/**
- * @template T
- * @typedef {{
- *  onadd: (self: T) => any,
- *  onremove: (self: T) => any,
- * }} Callbacks
- */
+import { DomEvents } from "../types";
 
-/**
- * @type {Set<WeakRef<Node>}
- */
-const monitoredNodes = new Set();
+type Callbacks = {
+	onadd: () => any;
+	onremove: () => any;
+}
 
-/**
- * @type {WeakMap<Node, Callbacks<any>>}
- */
-const registeredCallbacks = new WeakMap();
+const monitoredNodes = new Set<WeakRef<Node>>();
+const registeredCallbacks = new WeakMap<Node, Callbacks>();
+const nodeDomStatus = new WeakMap<Node, boolean>();
 
-/**
- * @type {WeakMap<Node, boolean>}
- */
-const nodeDomStatus = new WeakMap();
-
-let observer = null;
+let observer: MutationObserver | null = null;
 function ensureRunning() {
-	observer = observer || new MutationObserver(() => {
+	if (observer) return observer;
+	observer = new MutationObserver(() => {
 		for (const nodeRef of [...monitoredNodes]) {
 			const node = nodeRef.deref()
 			if (node) {
@@ -42,16 +31,12 @@ function ensureRunning() {
 				monitoredNodes.delete(nodeRef);
 			}
 		}
-	}).observe(document.body, { childList: true, subtree: true });
+	});
+	observer.observe(document.body, { childList: true, subtree: true });
 	return observer;
 };
 
-/**
- * @template T extends Node
- * @param {T} node 
- * @param {Callbacks<T>} callbacks
- */
-export function registerNodeDomCallbacks(node, callbacks) {
+export function registerNodeDomCallbacks(node: Node, callbacks: Callbacks) {
 	ensureRunning();
 	monitoredNodes.add(new WeakRef(node));
 	registeredCallbacks.set(node, callbacks);
@@ -61,10 +46,8 @@ export function registerNodeDomCallbacks(node, callbacks) {
 /**
  * Call the given function, capturing and logging any thrown exceptions
  * as errors.
- * 
- * @param {() => any} f 
  */
-function tryToCall(f) {
+function tryToCall(f: () => any) {
 	try {
 		f()
 	} catch (e) {
@@ -72,20 +55,9 @@ function tryToCall(f) {
 	}
 }
 
-/**
- * @type {import('../types').addWatcherHooks}
- */
-export function addWatcherHooks(node) {
-	/**
-	 * @type {Array<() => {}>}
-	 */
-	const onAddWatchers = [];
-
-	/**
-	 * @type {Array<() => {}>}
-	 */
-	const onRemoveWatchers = [];
-
+export function addWatcherHooks<T extends Node>(node: T): asserts node is T & DomEvents<T> {
+	const onAddWatchers: Array<(() => any)> = [];
+	const onRemoveWatchers: Array<(() => any)> = [];
 	let registered = false;
 
 	const ensureCallbacksAreRegistered = () => {
@@ -99,13 +71,13 @@ export function addWatcherHooks(node) {
 		registered = true;
 	};
 
-	node.onadd = (f) => {
+	(node as any).onadd = (f: ((self: T) => any)) => {
 		ensureCallbacksAreRegistered();
 		onAddWatchers.push(() => f(node));
 		return node;
 	};
 
-	node.onremove = (f) => {
+	(node as any).onremove = (f: ((self: T) => any)) => {
 		ensureCallbacksAreRegistered();
 		onRemoveWatchers.push(() => f(node));
 		return node;

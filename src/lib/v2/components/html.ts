@@ -1,33 +1,48 @@
+import {
+	Accessor,
+	ElementBuildersToRecords,
+	ElementContext,	
+	WithExtensions
+} from '../types.js';
 import { randomId, getAttributeUnder } from '../util.js';
 import { addWatcherHooks } from './dom-events.js';
 
-/**
- * @type {import('../types').html} 
- */
-export function html(
-	raw,
-	...builders
-) {
+export function html<T extends ReadonlyArray<unknown>>(
+	raw: ReadonlyArray<string>,
+	...builders: T
+): WithExtensions<HTMLElement & { data: ElementBuildersToRecords<T> }> {
 	// TODO: create a function hook and replace inline functions with those.
 	// then, the `builder?.f` check below can go away, as the swap will just
 	// act like a "normal" attribute replacement without the `id` accessor.
-	const adjustedBuilders = builders.map(b => {
+	const adjustedBuilders: (
+		| { id: string;
+			toString(): string;
+			handler: () => any; }
+		| {	toString: () => string;
+			id: string | null;
+			bless?: (context: ElementContext) => Accessor<any>;}
+		| object
+		| undefined
+	)[] = builders.map(b => {
 		if (typeof b === 'function') {
 			const id = randomId();
-			return { id, toString() { return id; }, f: b };
+			return {
+				id,
+				toString() { return id; },
+				handler: b as (...args: any) => any
+			};
 		} else if (Array.isArray(b)) {
 			const phId = randomId();
 			return {
 				id: null,
 				toString() { return `<ph data-id=${phId}></ph>`; },
-				bless(ctx) {
-					const ph = ctx.container.querySelector(`[data-id="${phId}"]`);
-					b.forEach(_b =>
-						typeof _b === 'string'
-						? ph.parentNode.insertBefore(document.createTextNode(_b), ph)
-						: ph.parentNode.insertBefore(_b, ph)
+				bless(ctx: ElementContext) {
+					const ph = ctx.container.querySelector(`[data-id="${phId}"]`)!;
+					b.forEach(_b => b instanceof Node
+						? ph.parentNode?.insertBefore(_b, ph)
+						: ph.parentNode?.insertBefore(document.createTextNode(String(_b)), ph)
 					);
-					ph.parentNode.removeChild(ph);
+					ph.parentNode?.removeChild(ph);
 				}
 			};
 		} else if (b instanceof Node) {
@@ -35,52 +50,50 @@ export function html(
 			return {
 				id: null,
 				toString() { return `<ph data-id=${phId}></ph>`; },
-				bless(ctx) {
-					const ph = ctx.container.querySelector(`[data-id="${phId}"]`);
-					ph.parentNode.replaceChild(b, ph);
+				bless(ctx: ElementContext) {
+					const ph = ctx.container.querySelector(`[data-id="${phId}"]`)!;
+					ph.parentNode?.replaceChild(b, ph);
 				}
 			};
 		} else {
-			return b;
+			return b as object;
 		}
 	});
 
 	const markup = String.raw({ raw }, ...adjustedBuilders).trim();
-	const firstNode = markup.trim().match(/<!?(\w+)/)[1].toLocaleLowerCase();
+	const firstNode = markup.trim().match(/<!?(\w+)/)![1].toLocaleLowerCase();
 	const parser = new DOMParser();
 	const container = parser.parseFromString(markup, 'text/html');
 
-	/**
-	 * @type {Element}
-	 */
-	const node = {
+	const node = ({
 		doctype: container.documentElement,
 		html: container.documentElement,
 		head: container.head,
 		body: container.body,
-	}[firstNode] || container.body.firstElementChild;
-
+	}[firstNode] || container.body.firstElementChild!) as unknown as
+		HTMLElement & { data: Record<string, any> };
 	node.data = {};
 
 	for (const builder of adjustedBuilders) {
-		let accessor;
+		if (!builder) continue;
+		let accessor: Accessor<any> | undefined = undefined;
 
-		if (typeof builder?.f === 'function') {
+		if ('handler' in builder && typeof builder.handler === 'function') {
 			// replace builder "text" with the actual builder function,
 			// which will include the closure.
 			const fAttr = getAttributeUnder(node, builder.id);
-			const e = fAttr.ownerElement
-			e.removeAttribute(fAttr.name);
-			e[fAttr.name] = builder.f;
+			const el = fAttr?.ownerElement
+			el?.removeAttribute(fAttr!.name);
+			el && (el[fAttr!.name] = builder.handler);
 		}
 
-		if (typeof builder?.bless === "function") {
+		if ('bless' in builder && typeof builder.bless === "function") {
 			accessor = builder.bless({ container: node, data: node.data });
 		}
 
 		// NOTE: behavior for adding accessors of varying types (e.g., list + text) is
 		// explicitly not defined and not accounted for.
-		if (builder?.id) {
+		if ('id' in builder && typeof builder.id === 'string') {
 			appendAccessor(node, builder.id, accessor);
 		}
 	}
@@ -88,20 +101,17 @@ export function html(
 	addWatcherHooks(node);
 	addExtends(node);
 
-	return node;
+	return node as any;
 }
 
 
-/**
- * @type {WeakMap<object, Record<string, {get: () => any, set(v: any) => void}[]>}
- */
-const knownAccessors = new WeakMap();
+const knownAccessors = new WeakMap<object, Record<string, Accessor<any>[]>>();
 
-/**
- * 
- * @param {HTMLElement & {data: object}} node 
- */
-function appendAccessor(node, propName, accessor) {
+function appendAccessor(
+	node: HTMLElement & {data: object},
+	propName: string,
+	accessor?: Accessor<any>
+) {
 	if (!knownAccessors.has(node.data)) {
 		const dataProp = node.data;
 		knownAccessors.set(dataProp, {});
@@ -110,14 +120,17 @@ function appendAccessor(node, propName, accessor) {
 			get() {
 				return dataProp;
 			},
-			set(newData) {
+			set(newData: object) {
 				for (const [k, v] of Object.entries(newData)) {
-					if (dataProp[k] instanceof Node
-						&& !(v instanceof Node)
-						&& typeof dataProp[k].data === 'object'
-						&& typeof v.data === 'object'
+					if ( // when ...
+						dataProp[k] instanceof Node // the target property IS a node,
+						&& typeof (dataProp[k] as any).data === 'object' // has `data`,
+						&& !(v instanceof Node) // and the intended value is NOT a node,
+						&& typeof v.data === 'object' // but instead looks like "data".
 					) {
-						dataProp[k].data = v.data;
+						// the intention is most likely hydration of a node tree with
+						// a data tree that mirrors the node tree.
+						(dataProp[k] as any).data = v.data;
 					} else {
 						dataProp[k] = v;
 					}
@@ -126,9 +139,9 @@ function appendAccessor(node, propName, accessor) {
 		});
 	}
 
-	const nodeAccessor = knownAccessors.get(node.data);
+	const nodeAccessor = knownAccessors.get(node.data)!;
 	if (!nodeAccessor[propName]) {
-		const nodePropAccessors = []
+		const nodePropAccessors: Accessor<any>[] = [];
 		nodeAccessor[propName] = nodePropAccessors;
 		Object.defineProperty(
 			node.data,
@@ -149,40 +162,18 @@ function appendAccessor(node, propName, accessor) {
 		);
 	}
 
-	nodeAccessor[propName].push(accessor);
-
-	// try {
-	// 	node.setAttribute(
-	// 		`wirejs-data-${propName}`,
-	// 		JSON.stringify(node.data[propName])
-	// 	);
-	// } catch {
-	// 	console.warn("Cannot serialize default value: ", v);
-	// }
+	accessor && nodeAccessor[propName].push(accessor);
 }
 
-/**
- * 
- * @param {object} target 
- */
-function addExtends(target) {
-	/**
-	 * @template T
-	 * @param {(node: object) => T} extend
-	 */
-	target.extend = (buildExtensions) => {
+function addExtends(target: object) {
+	(target as any).extend = (buildExtensions: ((target: object) => object)) => {
 		const extensions = buildExtensions(target);
 		mergeExtensionsIn(target, extensions);
 		return target;
 	}
 }
 
-/**
- * 
- * @param {object} target 
- * @param {object} extensions 
- */
-function mergeExtensionsIn(target, extensions) {
+function mergeExtensionsIn(target: object, extensions: object) {
 	for (const [k, v] of Object.entries(extensions)) {
 		if (k in target) {
 			// recursively merge properties in if `k` already exists on the target.

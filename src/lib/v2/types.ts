@@ -1,3 +1,8 @@
+import {
+	__dataType,
+	__renderedType,
+} from './internals.js'
+
 export type Primitive = string | number | boolean;
 
 export type AttributeValue = Primitive | ((...args: any) => any) | null | undefined;
@@ -9,10 +14,13 @@ export type Identified<ID extends string, Target> = {
 
 export type ElementContext = {
 	container: HTMLElement;
+	data: Record<string, unknown>;
 };
 
-const __dataType = Symbol('__dataType');
-const __renderedType = Symbol('_renderedType');
+export type Accessor<T> = {
+	get(): T;
+	set(value: T | Promise<T>): void;
+}
 
 export type ElementBuilder<
 	ID extends string | undefined,
@@ -21,7 +29,7 @@ export type ElementBuilder<
 > = {
 	toString: () => string;
 	id: ID;
-	bless?: (context: ElementContext) => void;
+	bless?: (context: ElementContext) => Accessor<DataType>;
 
 	/**
 	 * @deprecated
@@ -37,8 +45,6 @@ export type ElementBuilder<
 	 */
 	[__renderedType]: RenderedType;
 };
-
-
 
 export type KindaPretty<T> = T extends (...args: any) => any
 	? T
@@ -74,58 +80,7 @@ export type ElementBuildersToRecords<T> = T extends ReadonlyArray<any>
 	]>>
 	: never;
 
-export type html = <
-	T extends ReadonlyArray<
-		any
-		// Record<string, any> | ((evt: Event) => any)
-	>
->(
-	raw: ReadonlyArray<string>,
-	...builders: T
-) => WithExtensions<HTMLElement & { data: ElementBuildersToRecords<T> }>;
-
-export type id = <ID extends string>(id: ID) => ElementBuilder<ID, HTMLElement>;
-
-export type textElementBuilder = <
-	ID extends string
->(
-	id: ID,
-	...args:
-		| [ map?: (item: string) => string, value?: string ]
-		| [ value?: string, map?: (item: string) => string ]
-) => ElementBuilder<ID, string>; 
-
-export type list = <
-	ID extends string,
-	InputType = string
->(
-	id: ID,
-	...args:
-		| [ map?: (item: InputType) => any, data?: InputType[] ]
-		| [ data?: InputType[], map?: (item: InputType) => any ]
-) => ElementBuilder<ID, InputType[]>;
-
-export type node = <
-	ID extends string,
-	ReturnType extends HTMLElement,
-	InputType = string,
->(
-	id: ID,
-	...args:
-		| [ map?: (item?: InputType) => ReturnType, value?: InputType ]
-		| [ value: InputType, map?: (item?: InputType) => ReturnType ]
-) => ElementBuilder<ID, InputType>;
-
-export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
-
-export type attribute = <
-	ID extends string
->(
-	id: ID,
-	...args:
-		| [ map?: (item: AttributeValue) => AttributeValue, value?: AttributeValue[] ]
-		| [ value?: AttributeValue[], map?: (item: AttributeValue) => AttributeValue ]
-) => ElementBuilder<ID, AttributeValue>;
+// export type handle = (handler: (event: Event) => any) => ElementBuilder<never, never>;
 
 export type DomEvents<T extends Node> = {
 	/**
@@ -153,22 +108,9 @@ export type Extend<T extends Node> = {
 
 export type WithExtensions<T extends Node> = KindaPretty<T & DomEvents<T> & Extend<T>>;
 
-export type addWatcherHooks = <T extends Node>(node: T) => asserts node is T & DomEvents<T>;
-
-export type useJSDOM = (JSDOM: object) => void;
-
-export type dehydrate = (node: Element, isRoot?: boolean) => object;
-
 export type pendingHydration = {
 	id: string;
 	replacement:
 		| (Element & { data: object })
 		| (() => Element & { data: object })
 }[];
-
-export type hydrate = (
-	rendered: Element | string,
-	replacement:
-		| (Element & { data: object })
-		| ((init: { data: object }) => (Element & { data: object }))
-) => void;
