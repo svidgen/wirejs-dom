@@ -30,6 +30,7 @@ export function useJSDOM(JSDOM: any) {
     global.window = DOM.window;
     global.document = window.document;
     global.Element = window.Element;
+	global.HTMLElement = window.HTMLElement;
     global.Node = window.Node;
     global.NodeList = window.NodeList;
     global.DOMParser = DOM.window.DOMParser;
