@@ -2,18 +2,23 @@ import { __dataType, __renderedType } from "../internals.js";
 import { ElementBuilder } from "../types.js";
 import { isPromise } from "../util.js";
 
-export function id<ID extends string>(id: ID): ElementBuilder<ID, Node> {
+export function id<ID extends string, T extends Node>(
+	id: ID,
+	type?: new () => T
+): ElementBuilder<ID, T> {
 	return {
 		id,
 		toString: () => `data-id="${id}"`,
 		bless: context => {
-			let node: Node = context.container.querySelector(`[data-id="${id}"]`)!;
+			let node = context
+				.container
+				.querySelector(`[data-id="${id}"]`)! as unknown as T;
 			return {
-				get(): Node {
+				get(): T {
 					return node;
 				},
-				set(value: Node | Promise<Node>) {
-					function setNode(newValue: Node) {
+				set(value: T | Promise<T>) {
+					function setNode(newValue: T) {
 						const replacement = newValue || document.createTextNode('')
 						try {
 							node?.parentNode?.replaceChild(replacement, node)
@@ -31,7 +36,7 @@ export function id<ID extends string>(id: ID): ElementBuilder<ID, Node> {
 				}
 			}
 		},
-		[__dataType]: {} as Node,
-		[__renderedType]: {} as Node,
+		[__dataType]: {} as T,
+		[__renderedType]: {} as T,
 	};
 }
