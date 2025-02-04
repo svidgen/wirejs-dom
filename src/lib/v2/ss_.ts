@@ -28,13 +28,15 @@ export function useJSDOM(JSDOM: any) {
     });
 
     global.window = DOM.window;
-    global.document = window.document;
-    global.Element = window.Element;
-	global.HTMLElement = window.HTMLElement;
-    global.Node = window.Node;
-    global.NodeList = window.NodeList;
-    global.DOMParser = DOM.window.DOMParser;
-    global.MutationObserver = DOM.window.MutationObserver;
+	for (const k of Object.getOwnPropertyNames(window)) {
+		try {
+			// @ts-ignore
+			global[k] = global[k] || window[k];
+		} catch {
+			// JSDOM throws a fit when we try to access certain items.
+			// those items will be available in SSR/SSG contexts.
+		}
+	}
 }
 
 /**
