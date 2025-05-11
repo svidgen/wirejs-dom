@@ -1,5 +1,5 @@
 // @ts-check
-import { html, text } from '../../lib/v2/index.js';
+import { html, text, css } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
 // NOTE: The callbacks provided by the browser (and therefore this library) are not
@@ -417,6 +417,22 @@ QUnit.module("v2", () => {
 				node.data.name,
 				"world",
 				"the data element is set correctly"
+			);
+		});
+
+		QUnit.test('immediately adds embedded HTMLStyleElement nodes to the head', assert => {
+			const sheet = css`body { color: red; }`;
+			console.log(sheet);
+
+			const _node = html`<div>
+				${sheet}
+				Hello ${text('name', '___')}.
+			</div>`
+
+			assert.equal(
+				document.head.querySelector('style')?.textContent,
+				sheet.textContent,
+				'stylesheet is added to the document'
 			);
 		});
 

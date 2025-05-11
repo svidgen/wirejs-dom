@@ -1,4 +1,5 @@
 import './core.js';
+import './css.js'
 import './dom-events.js';
 import './id.js';
 import './attribute.js';

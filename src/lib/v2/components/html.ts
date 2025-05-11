@@ -15,6 +15,7 @@ export function html<T extends ReadonlyArray<unknown>>(
 	// then, the `builder?.f` check below can go away, as the swap will just
 	// act like a "normal" attribute replacement without the `id` accessor.
 	const adjustedBuilders: (
+		| HTMLStyleElement
 		| { id: string;
 			toString(): string;
 			handler: () => any; }
@@ -45,6 +46,9 @@ export function html<T extends ReadonlyArray<unknown>>(
 					ph.parentNode?.removeChild(ph);
 				}
 			};
+		} else if (b instanceof HTMLStyleElement) {
+			console.log('adding style element', b);
+			document.head.appendChild(b);
 		} else if (b instanceof Node) {
 			const phId = randomId();
 			return {
