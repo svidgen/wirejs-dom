@@ -424,15 +424,18 @@ QUnit.module("v2", () => {
 			const sheet = css`body { color: red; }`;
 			console.log(sheet);
 
-			const _node = html`<div>
-				${sheet}
-				Hello ${text('name', '___')}.
-			</div>`
+			const _node = html`<div>${sheet}Hello world.</div>`
 
 			assert.equal(
 				document.head.querySelector('style')?.textContent,
 				sheet.textContent,
 				'stylesheet is added to the document'
+			);
+
+			assert.equal(
+				_node.innerHTML,
+				"Hello world.",
+				"the markup doesn't include any remnants of the sheet"
 			);
 		});
 

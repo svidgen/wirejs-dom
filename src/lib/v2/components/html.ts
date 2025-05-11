@@ -47,8 +47,11 @@ export function html<T extends ReadonlyArray<unknown>>(
 				}
 			};
 		} else if (b instanceof HTMLStyleElement) {
-			console.log('adding style element', b);
 			document.head.appendChild(b);
+			return {
+				id: null,
+				toString() { return '' },
+			}
 		} else if (b instanceof Node) {
 			const phId = randomId();
 			return {
