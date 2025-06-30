@@ -220,7 +220,6 @@ QUnit.module("v2", () => {
 				);
 			});
 
-
 			QUnit.test("can be pushed to", assert => {
 				const t = html`<div>before ${
 					list('middle', ['a', 'b', 'c'])
@@ -571,6 +570,42 @@ QUnit.module("v2", () => {
 					[8, 7, 1],
 					"data property of the text node matches"
 				);
+			});
+
+			QUnit.test("can contain child lists", assert => {
+				const outer = html`<div>
+					${list('items', [[1,2,3],[4,5,6],[7,8,9]], sub => html`<ol>
+						${list('child-items', sub, li => html`<li>${li}</li>`)}
+					</ol>`)}
+				</div>`;
+
+				assert.ok(outer.innerHTML.includes('<li>1</li><li>2</li><li>3</li>'));
+				assert.ok(outer.innerHTML.includes('<li>4</li><li>5</li><li>6</li>'));
+				assert.ok(outer.innerHTML.includes('<li>7</li><li>8</li><li>9</li>'));
+			});
+
+			QUnit.test("can contain anonymous child list nodes", assert => {
+				const outer = html`<div>
+					${list('items', [[1,2,3],[4,5,6],[7,8,9]], sub => html`<ol>
+						${sub.map(li => html`<li>${li}</li>`)}
+					</ol>`)}
+				</div>`;
+
+				assert.ok(outer.innerHTML.includes('<li>1</li><li>2</li><li>3</li>'));
+				assert.ok(outer.innerHTML.includes('<li>4</li><li>5</li><li>6</li>'));
+				assert.ok(outer.innerHTML.includes('<li>7</li><li>8</li><li>9</li>'));
+			});
+
+			QUnit.test("can contain anonymous table nodes", assert => {
+				const outer = html`<table>
+					${list('items', [[1,2,3],[4,5,6],[7,8,9]], sub => html`<tr>
+						${sub.map(li => html`<td>${li}</td>`)}
+					</tr>`)}
+				</table>`;
+
+				assert.ok(outer.innerHTML.includes('<td>1</td><td>2</td><td>3</td>'));
+				assert.ok(outer.innerHTML.includes('<td>4</td><td>5</td><td>6</td>'));
+				assert.ok(outer.innerHTML.includes('<td>7</td><td>8</td><td>9</td>'));
 			});
 		})
 	});

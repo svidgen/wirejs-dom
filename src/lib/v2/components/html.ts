@@ -4,8 +4,36 @@ import {
 	ElementContext,	
 	WithExtensions
 } from '../types.js';
-import { randomId, getAttributeUnder } from '../util.js';
+import { randomId, getAttributeUnder, findCommentNode } from '../util.js';
 import { addWatcherHooks } from './dom-events.js';
+
+/**
+ * HTML tags that require context and would not be parsed as-is by DOMParser.
+ * 
+ * E.g., `tr` and `td` will be silently removed from the DOM by DOMParser if created
+ * as top-level nodes. These tags should be handled using a `template` node.
+ */
+const CONTEXTUAL_TAGS = new Set([
+	'base',
+	'caption',
+	'col',
+	'colgroup',
+	'link',
+	'math',
+	'meta',
+	'noscript',
+	'script',
+	'style',
+	'svg',
+	'tbody',
+	'td',
+	'template',
+	'tfoot',
+	'th',
+	'thead',
+	'title',
+	'tr',
+]);
 
 export function html<T extends ReadonlyArray<unknown>>(
 	raw: ReadonlyArray<string>,
@@ -36,9 +64,9 @@ export function html<T extends ReadonlyArray<unknown>>(
 			const phId = randomId();
 			return {
 				id: null,
-				toString() { return `<ph data-id=${phId}></ph>`; },
+				toString() { return `<!-- ${phId} -->`; },
 				bless(ctx: ElementContext) {
-					const ph = ctx.container.querySelector(`[data-id="${phId}"]`)!;
+					const ph = findCommentNode(ctx.container, phId)!;
 					b.forEach(_b => _b instanceof Node
 						? ph.parentNode?.insertBefore(_b, ph)
 						: ph.parentNode?.insertBefore(document.createTextNode(String(_b)), ph)
@@ -56,9 +84,9 @@ export function html<T extends ReadonlyArray<unknown>>(
 			const phId = randomId();
 			return {
 				id: null,
-				toString() { return `<ph data-id=${phId}></ph>`; },
+				toString() { return `<!-- ${phId} -->`; },
 				bless(ctx: ElementContext) {
-					const ph = ctx.container.querySelector(`[data-id="${phId}"]`)!;
+					const ph = findCommentNode(ctx.container, phId)!;
 					ph.parentNode?.replaceChild(b, ph);
 				}
 			};
@@ -69,16 +97,28 @@ export function html<T extends ReadonlyArray<unknown>>(
 
 	const markup = String.raw({ raw }, ...adjustedBuilders).trim();
 	const firstNode = markup.trim().match(/<!?(\w+)/)![1].toLocaleLowerCase();
-	const parser = new DOMParser();
-	const container = parser.parseFromString(markup, 'text/html');
 
-	const node = ({
-		doctype: container.documentElement,
-		html: container.documentElement,
-		head: container.head,
-		body: container.body,
-	}[firstNode] || container.body.firstElementChild!) as unknown as
-		HTMLElement & { data: Record<string, any> };
+	let node: HTMLElement & {
+    	data: Record<string, any>
+	};
+
+	if (CONTEXTUAL_TAGS.has(firstNode)) {
+		const container = document.createElement('template');
+		container.innerHTML = markup;
+		node = container.content.firstElementChild as unknown as
+			HTMLElement & { data: Record<string, any> };
+	} else {
+		const parser = new DOMParser();
+		const container = parser.parseFromString(markup, 'text/html');
+		node = ({
+			doctype: container.documentElement,
+			html: container.documentElement,
+			head: container.head,
+			body: container.body,
+		}[firstNode] || container.body.firstElementChild!) as unknown as
+			HTMLElement & { data: Record<string, any> };
+	}
+
 	node.data = {};
 
 	for (const builder of adjustedBuilders) {

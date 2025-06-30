@@ -61,3 +61,14 @@ export function setAttributeUnder(root: Element, id: string, value: any) {
 export function isPromise<RT>(o: unknown): o is Promise<RT> {
     return !!o && typeof o === 'object' && 'then' in o && typeof o.then === 'function';
 }
+
+export function findCommentNode(root: Node, match: string): Node | null {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    let current: Node | null;
+    while (current = walker.nextNode()) {
+        if (current.nodeValue?.trim() === match) {
+            return current;
+        }
+    }
+    return null;
+}

@@ -1,6 +1,6 @@
 import { __dataType, __renderedType } from '../internals.js';
 import { ElementBuilder } from '../types.js';
-import { randomId, isPromise } from '../util.js';
+import { randomId, isPromise, findCommentNode } from '../util.js';
 
 export function text<ID extends string>(
 	id: ID,
@@ -24,12 +24,12 @@ export function text<ID extends string>(
 
 	return {
 		id,
-		toString: () => `<textph data-id=${sentinelId}>${initialValue}</textph>`,
+		toString: () => `<!-- ${sentinelId} -->`,
 		bless: (context) => {
 			let innerValue = initialValue;
 
 			const node = document.createTextNode(map(innerValue));
-			const placeHolder = context.container.querySelector(`[data-id="${sentinelId}"]`)!;
+			const placeHolder = findCommentNode(context.container, sentinelId)!;
 			placeHolder.parentNode?.replaceChild(node, placeHolder);
 
 			return {

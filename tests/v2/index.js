@@ -1,4 +1,5 @@
 import './core.js';
+import './core-tags.js';
 import './css.js'
 import './dom-events.js';
 import './id.js';

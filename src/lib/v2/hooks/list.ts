@@ -1,7 +1,7 @@
 import { __dataType, __renderedType } from '../internals.js';
 import { ElementBuilder } from '../types.js';
 import { html } from '../components/html.js';
-import { randomId, isPromise } from '../util.js';
+import { randomId, isPromise, findCommentNode } from '../util.js';
 
 function insertAfter(newNode: Node, afterNode: Node) {
 	return afterNode.parentNode?.insertBefore(newNode, afterNode.nextSibling);
@@ -30,14 +30,14 @@ export function list<ID extends string, InputType = string>(
 
 	return {
 		id,
-		toString: () => `<placeholder data-id=${sentinelId} style='display: none;'></placeholder>`,
+		toString: () => `<!-- ${sentinelId} -->`,
 		bless: (context) => {
 			const nodes: Node[] = [];
 			const items: InputType[] = [];
 
 			// replace placeholder with empty start/end marker nodes for easy
 			// management with insertAfter/insertBefore operations.
-			const placeholder = context.container.querySelector(`[data-id="${sentinelId}"]`)!;
+			const placeholder = findCommentNode(context.container, sentinelId)!;
 			const startMarker = document.createTextNode('');
 			insertAfter(startMarker, placeholder);
 			const endMarker = document.createTextNode('');

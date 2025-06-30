@@ -422,8 +422,6 @@ QUnit.module("v2", () => {
 
 		QUnit.test('immediately adds embedded HTMLStyleElement nodes to the head', assert => {
 			const sheet = css`body { color: red; }`;
-			console.log(sheet);
-
 			const _node = html`<div>${sheet}Hello world.</div>`
 
 			assert.equal(

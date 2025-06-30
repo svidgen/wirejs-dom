@@ -1,6 +1,6 @@
 {
   "name": "wirejs-dom",
-  "version": "1.0.41",
+  "version": "1.0.42",
   "description": "Ultralite web component and DOM manipulation library.",
   "main": "./lib/index.js",
   "type": "module",
@@ -42,5 +42,8 @@
     "rimraf": "^3.0.2",
     "typescript": "^5.7.3",
     "wirejs-scripts": "^2.0.5"
+  },
+  "dependencies": {
+    "html-tags": "^5.0.0"
   }
 }
