@@ -23,7 +23,8 @@ This repository uses GitHub Actions for automated testing and publishing.
   - Installs dependencies
   - Builds the project
   - Runs tests
-  - Publishes to NPM with provenance
+  - Checks if the current version already exists on NPM (prevents duplicate publishes)
+  - Publishes to NPM with provenance (only if version is new)
 
 ## Required Setup
 
@@ -56,6 +57,20 @@ The publish workflow uses NPM's trusted publishing with provenance:
    - The workflow uses `--provenance` flag for trusted publishing
    - This creates cryptographically signed attestations linking the package to the source code
    - Requires `id-token: write` permission (already configured)
+
+## Version Management
+
+The publish workflow includes a version check that prevents duplicate publishes:
+- Before publishing, it checks if the version in `package.json` already exists on NPM
+- If the version exists, the publish step is skipped
+- If the version is new, it proceeds with publishing
+
+**Important**: Remember to bump the version in `package.json` before merging to main if you want the changes to be published. You can use:
+```bash
+npm version patch  # for bug fixes
+npm version minor  # for new features
+npm version major  # for breaking changes
+```
 
 ## Testing the Workflows
 
