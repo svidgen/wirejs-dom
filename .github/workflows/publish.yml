@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
       
@@ -51,8 +51,6 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
           fi
       
-      - name: Publish to NPM with provenance
+      - name: Publish to NPM with provenance (trusted publishing)
         if: steps.version-check.outputs.should_publish == 'true'
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

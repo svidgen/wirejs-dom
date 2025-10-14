@@ -9,17 +9,17 @@ This repository uses GitHub Actions for automated testing and publishing.
 - **Purpose**: Ensures all tests pass before code is merged
 - **Steps**:
   - Checks out the code
-  - Sets up Node.js (version 20)
+  - Sets up Node.js (version 22)
   - Installs dependencies
   - Builds the project
   - Runs tests
 
 ### 2. Publish to NPM (`publish.yml`)
 - **Trigger**: Runs automatically when code is merged to `main`
-- **Purpose**: Publishes the package to NPM with provenance attestation (trusted publishing)
+- **Purpose**: Publishes the package to NPM with provenance attestation using trusted publishing
 - **Steps**:
   - Checks out the code
-  - Sets up Node.js (version 20)
+  - Sets up Node.js (version 22)
   - Installs dependencies
   - Builds the project
   - Runs tests
@@ -40,23 +40,40 @@ To require tests to pass before merging PRs, configure branch protection:
    - ✅ Do not allow bypassing the above settings
 
 ### NPM Publishing Setup
-The publish workflow uses NPM's trusted publishing with provenance:
+The publish workflow uses NPM's **Trusted Publishers** feature with provenance attestation. This allows publishing without storing an NPM token in GitHub secrets.
 
-1. **Create NPM Token**:
-   - Go to [npmjs.com](https://www.npmjs.com/)
-   - Navigate to Access Tokens
-   - Create a new "Automation" or "Granular Access" token with publish permissions
-   
-2. **Add to GitHub Secrets**:
-   - Go to: `Settings` → `Secrets and variables` → `Actions`
-   - Click "New repository secret"
-   - Name: `NPM_TOKEN`
-   - Value: Your NPM token
+#### Setting up NPM Trusted Publishing:
 
-3. **Provenance**:
-   - The workflow uses `--provenance` flag for trusted publishing
-   - This creates cryptographically signed attestations linking the package to the source code
-   - Requires `id-token: write` permission (already configured)
+1. **Configure Trusted Publisher on NPM** (required):
+   - Go to [npmjs.com](https://www.npmjs.com/) and sign in
+   - Navigate to your package (or create it first if new)
+   - Go to package Settings → Publishing Access
+   - Under "Trusted Publishers", click "Add trusted publisher"
+   - Select "GitHub Actions" as the publisher type
+   - Enter:
+     - **Repository owner**: `svidgen`
+     - **Repository name**: `wirejs-dom`
+     - **Workflow name**: `publish.yml`
+     - **Environment name**: (leave empty)
+   - Save the configuration
+
+2. **How it works**:
+   - The workflow uses GitHub's OIDC token (via `id-token: write` permission) to authenticate with NPM
+   - No NPM token needs to be stored in GitHub secrets
+   - The `--provenance` flag creates cryptographically signed attestations linking the package to the source code
+   - NPM verifies the GitHub Actions workflow is authorized to publish based on the trusted publisher configuration
+
+3. **First-time package publishing**:
+   - If this is a new package (never published before), you'll need to publish it manually the first time before setting up trusted publishing
+   - Use `npm publish` locally with your NPM credentials for the first publish
+   - After the first publish, configure the trusted publisher on NPM as described above
+
+#### Alternative: Using NPM Token (fallback method)
+If you prefer not to use trusted publishing, you can add an NPM_TOKEN to the workflow:
+
+1. Create an NPM automation token at [npmjs.com](https://www.npmjs.com/)
+2. Add it to GitHub Secrets: `Settings` → `Secrets and variables` → `Actions` → `NPM_TOKEN`
+3. Uncomment the `NODE_AUTH_TOKEN` environment variable in the publish step of `publish.yml`
 
 ## Version Management
 
