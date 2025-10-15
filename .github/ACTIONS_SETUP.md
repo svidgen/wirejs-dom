@@ -36,29 +36,21 @@ This repository uses GitHub Actions for automated testing and publishing.
   - `feat!: redesign API` (major bump)
   - `docs: update README` (no bump)
 
-### 3. Version Bump (`version-bump.yml`)
-- **Trigger**: Runs automatically when a PR is merged to `main`
-- **Purpose**: Automatically bumps the package version based on the PR title
-- **Steps**:
-  - Determines version bump type from PR title
-  - Installs dependencies
-  - Runs `npm version` with appropriate bump type
-  - Commits version change with `[skip ci]` flag
-  - Pushes commit and tag back to repository
-- **Skips**: Documentation, style, test, and CI-only changes
-
-### 4. Publish to NPM (`publish.yml`)
+### 3. Publish to NPM (`publish.yml`)
 - **Trigger**: Runs automatically when code is pushed to `main` (except commits with `[skip ci]`)
-- **Purpose**: Publishes the package to NPM with provenance attestation using trusted publishing
+- **Purpose**: Automatically versions, builds, tests, and publishes the package to NPM
 - **Steps**:
-  - Checks out the code
-  - Sets up Node.js (version 22)
-  - Installs dependencies
-  - Builds the project
-  - Runs tests
-  - Checks if the current version already exists on NPM (prevents duplicate publishes)
-  - Publishes to NPM with provenance (only if version is new)
-- **Skips**: Commits containing `[skip ci]` in the message (e.g., version bump commits)
+  1. Collects all commits since the last `release:` commit
+  2. Determines version bump type based on commit prefixes (following semantic versioning)
+  3. Installs dependencies
+  4. Builds the project
+  5. Runs tests (if build and tests pass, continues)
+  6. Updates `package.json` with new version number
+  7. Publishes to NPM with provenance (using trusted publishing)
+  8. Commits version bump back to main with `release:` prefix and `[skip ci]` flag
+  9. Creates and pushes git tag for the release
+- **Skips**: Commits containing `[skip ci]` in the message (to avoid infinite loops)
+- **Smart Versioning**: Analyzes all commits since last release to determine appropriate version bump
 
 ## Required Setup
 
@@ -117,25 +109,29 @@ This repository uses **automated semantic versioning** based on PR titles:
 
 ### How It Works
 
-1. **PR Title Format**: All PRs must follow semantic commit conventions (enforced by `semantic-pr.yml`)
-2. **Automatic Version Bump**: When a PR is merged, the `version-bump.yml` workflow:
-   - Analyzes the PR title to determine the version bump type
-   - Automatically updates `package.json` version
-   - Commits the change with `[skip ci]` to avoid triggering unnecessary builds
-   - Pushes the version commit and tag to the repository
-3. **Automatic Publishing**: After the version bump, the `publish.yml` workflow:
-   - Checks if the new version exists on NPM
-   - Publishes to NPM if the version is new
-   - Skips commits with `[skip ci]` (like version bumps themselves)
+1. **Commit Messages**: All commits should follow semantic commit conventions (PR titles are validated by `semantic-pr.yml`)
+2. **Automatic Versioning and Publishing**: When code is pushed to `main`, the `publish.yml` workflow:
+   - Collects all commits since the last `release:` commit
+   - Analyzes commit messages to determine the appropriate version bump
+   - Builds and tests the code
+   - If tests pass, bumps the version in `package.json`
+   - Publishes the new version to NPM with provenance
+   - Commits the version change back to `main` with `release:` prefix and `[skip ci]` flag
+   - Creates a git tag for the release
+3. **Skip Logic**: The workflow skips on commits with `[skip ci]` to prevent infinite loops
 
 ### Version Bump Rules
 
-| PR Title Prefix | Version Bump | Example |
+The workflow analyzes **all commits** since the last `release:` commit to determine the version bump:
+
+| Commit Prefix | Version Bump | Example |
 |----------------|--------------|---------|
 | `feat:` | Minor (0.x.0) | `feat: add new feature` → 1.0.0 → 1.1.0 |
 | `fix:`, `perf:`, `refactor:`, `build:`, `chore:` | Patch (0.0.x) | `fix: resolve bug` → 1.0.0 → 1.0.1 |
-| `feat!:`, `fix!:`, etc. (with `!`) | Major (x.0.0) | `feat!: breaking change` → 1.0.0 → 2.0.0 |
+| Any type with `!` (e.g., `feat!:`, `fix!:`) | Major (x.0.0) | `feat!: breaking change` → 1.0.0 → 2.0.0 |
 | `docs:`, `style:`, `test:`, `ci:`, `revert:` | No bump | `docs: update README` → 1.0.0 → 1.0.0 |
+
+**Note**: If any commit since the last release indicates a major bump, the workflow will perform a major bump. If no major but at least one minor, it performs a minor bump. Otherwise, if there are patch-worthy commits, it performs a patch bump.
 
 ### Manual Version Bumping (Not Recommended)
 
@@ -151,7 +147,9 @@ npm version major  # for breaking changes
 ## Testing the Workflows
 
 The workflows will run automatically when:
-- A pull request is opened or updated → `pr-tests.yml` runs
-- Code is pushed to main (e.g., after merge) → Both workflows run
+- A pull request is opened or updated → `pr-tests.yml` and `semantic-pr.yml` run
+- Code is pushed to main (e.g., after PR merge) → `publish.yml` runs
+  - The publish workflow will analyze commits, version, build, test, publish, and commit back to main
+  - The commit back to main includes `[skip ci]` to prevent infinite loops
 
 You can also manually trigger workflows from the Actions tab in GitHub.
