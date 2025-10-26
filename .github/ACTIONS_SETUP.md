@@ -37,7 +37,7 @@ This repository uses GitHub Actions for automated testing and publishing.
   - `docs: update README` (no bump)
 
 ### 3. Publish to NPM (`publish.yml`)
-- **Trigger**: Runs automatically after the "PR Tests" workflow completes successfully on `main` branch (except commits with `[skip ci]`)
+- **Trigger**: Uses `workflow_run` trigger to run automatically after the "PR Tests" workflow completes successfully on `main` branch (except commits with `[skip ci]`)
 - **Purpose**: Automatically versions, builds, tests, and publishes the package to NPM
 - **Dependency**: This workflow waits for the "PR Tests" workflow to finish and only runs if tests pass
 - **Steps**:
@@ -152,7 +152,7 @@ The workflows will run automatically when:
 - Code is pushed to main (e.g., after PR merge) → `pr-tests.yml` runs first, then `publish.yml` runs after tests pass
   - The PR Tests workflow runs first to validate the code
   - Only if tests pass successfully, the publish workflow will start
-  - The publish workflow will analyze commits, version, build, test again, publish, and commit back to main
+  - The publish workflow will analyze commits, version, build, run verification tests, publish, and commit back to main
   - The commit back to main includes `[skip ci]` to prevent infinite loops
 
 You can also manually trigger workflows from the Actions tab in GitHub.
