@@ -1,14 +1,17 @@
 name: Publish to NPM
 
 on:
-  push:
+  workflow_run:
+    workflows: ["PR Tests"]
+    types:
+      - completed
     branches:
       - main
 
 jobs:
   publish:
-    # Skip if commit message contains [skip ci]
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    # Only run if the PR Tests workflow succeeded and commit message doesn't contain [skip ci]
+    if: ${{ github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for provenance/trusted publishing
