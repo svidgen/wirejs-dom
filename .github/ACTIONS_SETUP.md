@@ -37,8 +37,9 @@ This repository uses GitHub Actions for automated testing and publishing.
   - `docs: update README` (no bump)
 
 ### 3. Publish to NPM (`publish.yml`)
-- **Trigger**: Runs automatically when code is pushed to `main` (except commits with `[skip ci]`)
+- **Trigger**: Runs automatically after the "PR Tests" workflow completes successfully on `main` branch (except commits with `[skip ci]`)
 - **Purpose**: Automatically versions, builds, tests, and publishes the package to NPM
+- **Dependency**: This workflow waits for the "PR Tests" workflow to finish and only runs if tests pass
 - **Steps**:
   1. Collects all commits since the last `release:` commit
   2. Determines version bump type based on commit prefixes (following semantic versioning)
@@ -148,8 +149,10 @@ npm version major  # for breaking changes
 
 The workflows will run automatically when:
 - A pull request is opened or updated → `pr-tests.yml` and `semantic-pr.yml` run
-- Code is pushed to main (e.g., after PR merge) → `publish.yml` runs
-  - The publish workflow will analyze commits, version, build, test, publish, and commit back to main
+- Code is pushed to main (e.g., after PR merge) → `pr-tests.yml` runs first, then `publish.yml` runs after tests pass
+  - The PR Tests workflow runs first to validate the code
+  - Only if tests pass successfully, the publish workflow will start
+  - The publish workflow will analyze commits, version, build, test again, publish, and commit back to main
   - The commit back to main includes `[skip ci]` to prevent infinite loops
 
 You can also manually trigger workflows from the Actions tab in GitHub.
