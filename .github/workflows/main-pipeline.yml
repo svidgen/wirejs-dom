@@ -1,17 +1,20 @@
-name: Publish to NPM
+name: Main Pipeline
 
 on:
-  workflow_run:
-    workflows: ["PR Tests"]
-    types:
-      - completed
+  push:
     branches:
       - main
 
 jobs:
+  # First job: Run tests by calling the reusable test workflow
+  test:
+    uses: ./.github/workflows/pr-tests.yml
+  
+  # Second job: Publish to NPM if tests pass and changes warrant a release
   publish:
-    # Only run if the PR Tests workflow succeeded and commit message doesn't contain [skip ci]
-    if: ${{ github.event.workflow_run.conclusion == 'success' && !contains(github.event.workflow_run.head_commit.message, '[skip ci]') }}
+    needs: test
+    # Only run if commit message doesn't contain [skip ci]
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for provenance/trusted publishing
@@ -83,10 +86,6 @@ jobs:
         if: steps.version-bump.outputs.bump_type != 'skip'
         run: npm run build
       
-      - name: Run tests
-        if: steps.version-bump.outputs.bump_type != 'skip'
-        run: npm test
-      
       - name: Bump version
         if: steps.version-bump.outputs.bump_type != 'skip'
         id: bump
@@ -104,6 +103,8 @@ jobs:
       - name: Publish to NPM with provenance
         if: steps.version-bump.outputs.bump_type != 'skip'
         run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Commit version bump
         if: steps.version-bump.outputs.bump_type != 'skip'
