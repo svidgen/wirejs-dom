@@ -8,6 +8,8 @@ on:
 jobs:
   # First job: Run tests by calling the reusable test workflow
   test:
+    permissions:
+      contents: read  # Required to checkout code
     uses: ./.github/workflows/pr-tests.yml
   
   # Second job: Publish to NPM if tests pass and changes warrant a release
