@@ -19,6 +19,7 @@
     "update-version": "node scripts/update-version.js",
     "prebuild": "npm run update-version",
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "wirejs-scripts start",
     "test": "qunit tests/cli.js"
   },
