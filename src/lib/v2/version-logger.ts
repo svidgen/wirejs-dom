@@ -1,19 +1,14 @@
 /**
- * Logs the wirejs-dom version to the console once per browser session.
- * Uses sessionStorage to track if the version has already been logged.
+ * Logs the wirejs-dom version to the console once per page load.
+ * Uses a module-level variable to track if the version has already been logged.
  */
 
-// TODO: Automate version injection during build process
-// For now, this must be manually updated to match package.json version
-// Consider using a build script or bundler plugin to inject the version automatically
-const VERSION = '1.0.42';
-const STORAGE_KEY = `wirejs-dom-version-logged-${VERSION}`;
+import { VERSION } from './version.js';
 
 let hasLogged = false;
 
 /**
- * Logs the wirejs-dom version to the console if it hasn't been logged
- * in this browser session yet.
+ * Logs the wirejs-dom version to the console if it hasn't been logged yet.
  */
 export function logVersionOnce(): void {
 	// Skip if already logged in this execution context
@@ -22,25 +17,21 @@ export function logVersionOnce(): void {
 	}
 
 	// Check if we're in a browser environment
-	if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') {
+	if (typeof window === 'undefined') {
 		return;
 	}
 
-	// Check if version was already logged in this session
-	try {
-		if (sessionStorage.getItem(STORAGE_KEY)) {
-			hasLogged = true;
-			return;
-		}
+	// Log the version
+	console.log(`wirejs-dom v${VERSION}`);
 
-		// Log the version
-		console.log(`wirejs-dom v${VERSION}`);
+	// Mark as logged
+	hasLogged = true;
+}
 
-		// Mark as logged in sessionStorage
-		sessionStorage.setItem(STORAGE_KEY, 'true');
-		hasLogged = true;
-	} catch (e) {
-		// Silently fail if sessionStorage is not available (e.g., in private browsing mode)
-		// or if there's any other error
-	}
+/**
+ * Reset the logged state. Only for testing purposes.
+ * @internal
+ */
+export function resetLogState(): void {
+	hasLogged = false;
 }
