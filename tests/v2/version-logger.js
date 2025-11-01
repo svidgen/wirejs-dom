@@ -42,6 +42,9 @@ QUnit.module("v2", () => {
 					'Version log should match format "wirejs-dom vX.Y.Z"'
 				);
 
+				// Extract the actual version that was logged for use in subsequent test
+				const loggedVersion = versionLogs[0][0];
+
 				// Clear log calls for next check
 				logCalls.length = 0;
 
@@ -71,11 +74,35 @@ QUnit.module("v2", () => {
 				return;
 			}
 
-			// Set sessionStorage to indicate version was already logged
-			sessionStorage.setItem('wirejs-dom-version-logged-1.0.42', 'true');
-
-			// Mock console.log to capture output
+			// First, clear sessionStorage and create an element to get the actual version
+			sessionStorage.clear();
+			
+			// Mock console.log to capture the version that gets logged
 			const originalConsoleLog = console.log;
+			let loggedVersion = null;
+			console.log = (...args) => {
+				if (args[0] && typeof args[0] === 'string' && args[0].startsWith('wirejs-dom v')) {
+					loggedVersion = args[0];
+				}
+				originalConsoleLog(...args);
+			};
+
+			// Create first element to populate sessionStorage
+			html`<div>Initial</div>`;
+			
+			// Find the storage key that was set
+			let storageKey = null;
+			for (let i = 0; i < sessionStorage.length; i++) {
+				const key = sessionStorage.key(i);
+				if (key && key.startsWith('wirejs-dom-version-logged-')) {
+					storageKey = key;
+					break;
+				}
+			}
+
+			assert.ok(storageKey, 'Storage key should have been set');
+
+			// Now clear logs and test that it doesn't log again
 			const logCalls = [];
 			console.log = (...args) => {
 				logCalls.push(args);

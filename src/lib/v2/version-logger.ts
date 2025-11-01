@@ -3,7 +3,9 @@
  * Uses sessionStorage to track if the version has already been logged.
  */
 
-// This will be replaced during build with the actual version from package.json
+// TODO: Automate version injection during build process
+// For now, this must be manually updated to match package.json version
+// Consider using a build script or bundler plugin to inject the version automatically
 const VERSION = '1.0.42';
 const STORAGE_KEY = `wirejs-dom-version-logged-${VERSION}`;
 
