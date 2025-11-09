@@ -9,5 +9,4 @@ import './node.js';
 import './list.js';
 import './signals.js';
 import './core-rehydration.js';
-import './version-logger.js';
 import './examples/index.js';
