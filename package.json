@@ -1,6 +1,6 @@
 {
   "name": "wirejs-dom",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "description": "Ultralite web component and DOM manipulation library.",
   "main": "./lib/index.js",
   "type": "module",
