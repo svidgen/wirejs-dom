@@ -6,7 +6,6 @@ import {
 } from '../types.js';
 import { randomId, getAttributeUnder, findCommentNode } from '../util.js';
 import { addWatcherHooks } from './dom-events.js';
-import { logVersionOnce } from '../version-logger.js';
 
 /**
  * HTML tags that require context and would not be parsed as-is by DOMParser.
@@ -40,9 +39,6 @@ export function html<T extends ReadonlyArray<unknown>>(
 	raw: ReadonlyArray<string>,
 	...builders: T
 ): WithExtensions<HTMLElement & { data: ElementBuildersToRecords<T> }> {
-	// Log version once per session on first use
-	logVersionOnce();
-
 	// TODO: create a function hook and replace inline functions with those.
 	// then, the `builder?.f` check below can go away, as the swap will just
 	// act like a "normal" attribute replacement without the `id` accessor.
