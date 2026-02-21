@@ -10,8 +10,8 @@ function insertAfter(newNode: Node, afterNode: Node) {
 export function list<ID extends string, InputType = string>(
 	id: ID,
 	...args:
-		| [ map?: (item: InputType) => any, data?: InputType[] ]
-		| [ data?: InputType[], map?: (item: InputType) => any ]
+		| [ map?: (item: InputType) => any, data?: InputType[] | Promise<InputType[]> ]
+		| [ data?: InputType[] | Promise<InputType[]>, map?: (item: InputType) => any ]
 ): ElementBuilder<ID, InputType[]> {
 	const [mapperOrDataA, mapperOrDataB] = args;
 	const map =
@@ -24,6 +24,12 @@ export function list<ID extends string, InputType = string>(
 		Array.isArray(mapperOrDataA) ? mapperOrDataA :
 		Array.isArray(mapperOrDataB) ? mapperOrDataB :
 		[]
+	;
+
+	const initialPromise: Promise<InputType[]> | null =
+		isPromise<InputType[]>(mapperOrDataA) ? mapperOrDataA :
+		isPromise<InputType[]>(mapperOrDataB) ? mapperOrDataB :
+		null
 	;
 
 	const sentinelId = randomId();
@@ -185,7 +191,11 @@ export function list<ID extends string, InputType = string>(
 				}
 			});
 
-			proxy.push(...initialItems)
+			if (initialPromise) {
+				initialPromise.then(v => proxy.push(...v));
+			} else {
+				proxy.push(...initialItems);
+			}
 
 			return {
 				get() {
