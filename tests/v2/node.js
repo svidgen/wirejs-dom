@@ -1,3 +1,4 @@
+// @ts-check
 import { html, node } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
@@ -120,8 +121,34 @@ QUnit.module("v2", () => {
 
 			const p = Promise.resolve('promised value');
 
-			// will require a typecast in TS
+			// @ts-expect-error - Promise is accepted at runtime; the data property type is the resolved type
 			t.data.middle = p;
+			await p;
+
+			assert.equal(
+				t.innerHTML,
+				"before <span>promised value</span> after",
+				"tag innerHTML matches"
+			);
+
+			assert.equal(
+				t.data.middle,
+				'promised value',
+				'data property of the node matches'
+			);
+		});
+
+		QUnit.test("can be initialized with a promise", async assert => {
+			const p = Promise.resolve('promised value');
+			const t = html`<div>before ${node(
+				'middle',
+				p,
+				/**
+				 * @param {string} v
+				 */
+				(v) => html`<span>${v}</span>`)
+				} after</div>`;
+
 			await p;
 
 			assert.equal(

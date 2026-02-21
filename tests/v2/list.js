@@ -1,3 +1,4 @@
+// @ts-check
 import { html, list } from '../../lib/v2/index.js';
 import QUnit from 'qunit';
 
@@ -159,8 +160,8 @@ QUnit.module("v2", () => {
 
 				const p = Promise.resolve('edited');
 
-				// will require typecast in TS
-				t.data.middle[1] = p;
+			// @ts-expect-error - Promise is accepted at runtime; the data property type is the resolved type
+			t.data.middle[1] = p;
 
 				await p;
 
@@ -184,8 +185,8 @@ QUnit.module("v2", () => {
 
 				const p = Promise.resolve(['x', 'y', 'z']);
 
-				// will require typecast in TS
-				t.data.middle = p;
+			// @ts-expect-error - Promise is accepted at runtime; the data property type is the resolved type
+			t.data.middle = p;
 
 				await p;
 
@@ -199,6 +200,25 @@ QUnit.module("v2", () => {
 					t.data.middle,
 					['x', 'y', 'z'],
 					"data property of the text node matches"
+				);
+			});
+
+			QUnit.test("can be initialized with a promise", async assert => {
+				const p = Promise.resolve(['x', 'y', 'z']);
+				const t = html`<div>before ${list('middle', p)} after</div>`;
+
+				await p;
+
+				assert.equal(
+					t.innerHTML,
+					"before <div>x</div><div>y</div><div>z</div> after",
+					"tag innerHTML matches"
+				);
+
+				assert.deepEqual(
+					t.data.middle,
+					['x', 'y', 'z'],
+					"data property of the list matches"
 				);
 			});
 

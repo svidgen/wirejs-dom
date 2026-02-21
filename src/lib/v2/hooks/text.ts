@@ -5,8 +5,8 @@ import { randomId, isPromise, findCommentNode } from '../util.js';
 export function text<ID extends string>(
 	id: ID,
 	...args:
-		| [ map?: (item: string) => string, value?: string ]
-		| [ value?: string, map?: (item: string) => string ]
+		| [ map?: (item: string) => string, value?: string | Promise<string> ]
+		| [ value?: string | Promise<string>, map?: (item: string) => string ]
 ): ElementBuilder<ID, string> {
 	const [mapperOrDataA, mapperOrDataB] = args;
 
@@ -17,7 +17,8 @@ export function text<ID extends string>(
 	;
 
 	const initialValue =
-		(typeof mapperOrDataA === 'function' ? mapperOrDataB : mapperOrDataA) as string
+		(typeof mapperOrDataA === 'function' ? mapperOrDataB : mapperOrDataA) as
+			string | Promise<string> | undefined
 	;
 
 	const sentinelId = randomId();
@@ -26,15 +27,25 @@ export function text<ID extends string>(
 		id,
 		toString: () => `<!-- ${sentinelId} -->`,
 		bless: (context) => {
-			let innerValue = initialValue;
+			let innerValue: string | undefined;
 
-			const node = document.createTextNode(map(innerValue));
+			const node = document.createTextNode('');
 			const placeHolder = findCommentNode(context.container, sentinelId)!;
 			placeHolder.parentNode?.replaceChild(node, placeHolder);
 
+			if (isPromise<string>(initialValue)) {
+				initialValue.then(v => {
+					innerValue = v;
+					node.nodeValue = map(v);
+				});
+			} else {
+				innerValue = initialValue;
+				node.nodeValue = map(innerValue as string);
+			}
+
 			return {
 				get(): string {
-					return innerValue;
+					return innerValue!;
 				},
 				set(value: string | Promise<string>) {
 					if (isPromise<string>(value)) {

@@ -9,8 +9,8 @@ export function node<
 >(
 	id: ID,
 	...args:
-		| [ map?: (item?: InputType) => ReturnType, value?: InputType ]
-		| [ value: InputType, map?: (item?: InputType) => ReturnType ]
+		| [ map?: (item?: InputType) => ReturnType, value?: InputType | Promise<InputType> ]
+		| [ value: InputType | Promise<InputType>, map?: (item?: InputType) => ReturnType ]
 ): ElementBuilder<ID, InputType, ReturnType> {
 	const [mapperOrDataA, mapperOrDataB] = args;
 
@@ -27,7 +27,8 @@ export function node<
 	;
 
 	const initialValue =
-		(typeof mapperOrDataA === 'function' ? mapperOrDataB : mapperOrDataA) as InputType
+		(typeof mapperOrDataA === 'function' ? mapperOrDataB : mapperOrDataA) as
+			InputType | Promise<InputType> | undefined
 	;
 
 	const sentinelId = randomId();
@@ -36,9 +37,9 @@ export function node<
 		id,
 		toString: () => `<!-- ${sentinelId} -->`,
 		bless: (context) => {
-			let innerValue: InputType = initialValue;
+			let innerValue: InputType | undefined;
 
-			let node = map(innerValue);
+			let node = map(isPromise<InputType>(initialValue) ? undefined : initialValue as InputType);
 			const placeHolder = findCommentNode(context.container, sentinelId)!;
 			placeHolder.parentNode?.replaceChild(node, placeHolder);
 
@@ -48,9 +49,18 @@ export function node<
 				node = newNode;
 			}
 
+			if (isPromise<InputType>(initialValue)) {
+				initialValue.then(v => {
+					innerValue = v;
+					setValue(v);
+				});
+			} else {
+				innerValue = initialValue;
+			}
+
 			return {
 				get(): InputType {
-					return innerValue;
+					return innerValue!;
 				},
 				set(value: InputType | Promise<InputType>) {
 					if (isPromise<InputType>(value)) {
