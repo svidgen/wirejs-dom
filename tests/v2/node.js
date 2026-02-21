@@ -108,6 +108,35 @@ QUnit.module("v2", () => {
 			);
 		});
 
+		QUnit.test("prop accepts promises and renders results", async assert => {
+			const t = html`<div>before ${node(
+				'middle',
+				'default value',
+				/**
+				 * @param {string} v 
+				 */
+				(v) => html`<span>${v}</span>`)
+				} after</div>`;
+
+			const p = Promise.resolve('promised value');
+
+			// will require a typecast in TS
+			t.data.middle = p;
+			await p;
+
+			assert.equal(
+				t.innerHTML,
+				"before <span>promised value</span> after",
+				"tag innerHTML matches"
+			);
+
+			assert.equal(
+				t.data.middle,
+				'promised value',
+				'data property of the node matches'
+			);
+		});
+
 		QUnit.test("can be conditional", assert => {
 			const t = html`<div>before ${node(
 				'middle',
