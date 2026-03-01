@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<!--
+  wirejs-dom showcase
+  ───────────────────
+  1. Build the library:   npm run build
+  2. Serve the repo root: npx serve .   (default port: 3000)
+  3. Open:                http://localhost:3000/demo/
+-->
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>wirejs-dom — Component Showcase</title>
+  <style>
+    /* Page chrome — minimal layout/reset only; component styles come from the library */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f5f5f7;
+      font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #1d1b20;
+    }
+
+    .app-main { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* demo card chrome */
+    .demo-card   { background: #fff; border-radius: 12px; overflow: hidden;
+                   box-shadow: 0 1px 3px rgba(0,0,0,.12); margin-bottom: 20px; }
+    .demo-preview{ padding: 24px; display: flex; flex-wrap: wrap;
+                   gap: 12px; align-items: flex-start;
+                   border-bottom: 1px solid #e0d8f0; min-height: 56px; }
+    .demo-preview.col { flex-direction: column; }
+    .demo-code   { margin: 0; padding: 20px 24px;
+                   background: #1e1e2e; color: #cdd6f4;
+                   font-family: "Fira Code", Consolas, monospace;
+                   font-size: .8125rem; line-height: 1.6; overflow-x: auto;
+                   white-space: pre; }
+    .demo-out    { padding: 8px 24px 12px; font-size: .875rem; color: #49454f;
+                   background: #faf7ff; border-top: 1px dashed #e0d8f0; }
+    .demo-out b  { color: #6750a4; }
+
+    /* section headings */
+    .showcase-section   { margin-bottom: 48px; }
+    .showcase-section h2{ font-size: 1.5rem; font-weight: 400; color: #6750a4;
+                          border-bottom: 2px solid #e8def8; padding-bottom: 8px;
+                          margin: 0 0 24px; }
+
+    /* small helpers used inside demos */
+    .badge     { display: inline-block; padding: 4px 12px;
+                 background: #eaddff; border-radius: 9999px;
+                 color: #21005d; font-weight: 500; }
+    .badge-new { background: #c0efd0; color: #003314; }
+    .demo-input{ padding: 8px 12px; border: 1px solid #79747e; border-radius: 4px;
+                 font-size: 1rem; font-family: inherit; outline: none; }
+    .demo-input:focus { border-color: #6750a4; }
+    .tracked-el{ padding: 10px 16px; background: #eaddff; border-radius: 8px;
+                 color: #21005d; font-weight: 500; display: inline-block; }
+
+    /* build-needed banner */
+    #build-needed{ padding: 32px; background: #fff3cd; border: 2px solid #e8b84b;
+                   border-radius: 12px; margin: 48px auto; max-width: 600px;
+                   font-size: 1rem; color: #5a3e00; text-align: center; }
+    #build-needed code{ background: rgba(0,0,0,.08); border-radius: 4px;
+                        padding: 2px 6px; font-family: monospace; }
+
+    /* dark theme overrides */
+    html.dark body { background: #0f0e13; color: #e6e0e9; }
+    html.dark .showcase-section h2 { color: #d0bcff; border-bottom-color: #4f378b; }
+    html.dark .demo-card   { background: #1c1b1f; }
+    html.dark .demo-preview{ border-bottom-color: #49454f; }
+    html.dark .demo-out    { background: #211f26; border-top-color: #49454f; color: #cac4d0; }
+    html.dark .demo-out b  { color: #d0bcff; }
+    html.dark .demo-input  { background: #2d2b32; color: #e6e0e9; border-color: #938f99; }
+    html.dark .badge       { background: #4f378b; color: #eaddff; }
+  </style>
+</head>
+<body>
+
+<!-- Shown until module loads; hidden by JS once the library is imported. -->
+<div id="build-needed">
+  <strong>Library not found.</strong><br /><br />
+  Run <code>npm run build</code> from the repo root, then serve it:<br />
+  <code>npx serve .</code> &rarr; open <code>http://localhost:PORT/demo/</code>
+</div>
+
+<script type="module">
+// Dynamic imports let us show a friendly message if the library hasn't been built yet.
+let mods;
+try {
+  mods = await Promise.all([
+    import('../lib/v2/index.js'),
+    import('../lib/ui/index.js'),
+  ]);
+} catch {
+  // banner already visible — nothing more to do
+  console.error('wirejs-dom library not found. Run `npm run build` first.');
+  throw new Error('Library not built');
+}
+
+const { html, text, id, attribute, list, css } = mods[0];
+const {
+  applyTheme, lightTheme, darkTheme, createTheme,
+  Button, Typography, Card, TextField,
+  AppBar, Container, Stack, Row, Section,
+  Chip, List, ListItem, Divider, Dialog,
+} = mods[1];
+
+document.getElementById('build-needed').style.display = 'none';
+applyTheme(lightTheme);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers — built entirely with html`` templates
+// ─────────────────────────────────────────────────────────────────────────────
+
+// A demo card: preview element (or array of elements) + code string.
+// text('src', codeStr) is used to set code as a *text node* — safe, no HTML escape needed.
+function demoCard(preview, codeStr, outputEl) {
+  // html`` supports Node interpolations, array interpolations, and text() hooks.
+  const el = html`<div class="demo-card">
+    <div class="demo-preview">${preview}</div>
+    <pre class="demo-code">${text('src', codeStr)}</pre>
+  </div>`;
+  if (outputEl) el.appendChild(outputEl); // optional output strip can't be in the template literal above
+  return el;
+}
+
+function columnCard(preview, codeStr, outputEl) {
+  const el = demoCard(preview, codeStr, outputEl);
+  el.querySelector('.demo-preview').classList.add('col');
+  return el;
+}
+
+// A small "output" strip below a card that shows a reactive value.
+function outEl(label, initial) {
+  return html`<div class="demo-out">${label} <b>${text('val', initial)}</b></div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v2 Primitive examples
+// Each preview is itself an html`` element using the feature being demoed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// html`` — creates an HTMLElement from a tagged template literal
+const htmlEx = html`<div>
+  Hello from <b>wirejs-dom</b>! This element was created with
+  <code>html&grave;...&grave;</code> — a tagged template that returns an
+  <code>HTMLElement</code> you can interpolate into other templates.
+</div>`;
+
+// text() — reactive text node; update via .data.propName
+const counterOut = outEl('Count:', '0');
+const counterEx = html`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  Count: <strong>${text('n', '0')}</strong>
+  ${Button({ label: '+ Increment', variant: 'outlined', size: 'small',
+    onClick: () => { counterEx.data.n = String(+counterEx.data.n + 1); counterOut.data.val = counterEx.data.n; }
+  })}
+  ${Button({ label: 'Reset', variant: 'text', size: 'small',
+    onClick: () => { counterEx.data.n = '0'; counterOut.data.val = '0'; }
+  })}
+</div>`;
+
+// id() — extracts a DOM node as a data property; settable to replace the node
+const idEx = html`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  Badge: <span ${id('badge')} class="badge">original node</span>
+  ${Button({ label: 'Replace node', variant: 'outlined', size: 'small',
+    onClick: () => { idEx.data.badge = html`<span class="badge badge-new">✓ replaced!</span>`; }
+  })}
+  ${Button({ label: 'Reset', variant: 'text', size: 'small',
+    onClick: () => { idEx.data.badge = html`<span class="badge">original node</span>`; }
+  })}
+</div>`;
+
+// attribute() — reactive DOM attribute binding.
+// On input[value], wirejs-dom auto-syncs data.val on every keystroke.
+const attrOut = outEl('data.val reads:', 'hello wirejs-dom');
+let attrEx;
+attrEx = html`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  <input class="demo-input" type="text" value=${attribute('val', 'hello wirejs-dom')} />
+  ${Button({ label: 'Read data.val \u2192', variant: 'outlined', size: 'small',
+    onClick: () => { attrOut.data.val = attrEx.data.val; }
+  })}
+</div>`;
+
+// list() + attribute() — the todo-app pattern from the README.
+// push/pop on data.items update the DOM automatically.
+const todoEx = html`<div>
+  <ul style="margin:0 0 8px;padding-left:20px">
+    ${list('items', item => html`<li>${item}</li>`, ['buy groceries', 'walk the dog'])}
+  </ul>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <input class="demo-input" type="text"
+      value=${attribute('newItem', '')} placeholder="New item\u2026" />
+    ${Button({ label: '+ Add', variant: 'outlined', size: 'small',
+      onClick: () => {
+        if (todoEx.data.newItem.trim()) {
+          todoEx.data.items.push(todoEx.data.newItem.trim());
+          todoEx.data.newItem = '';
+        }
+      }
+    })}
+    ${Button({ label: '\u2212 Remove last', variant: 'text', size: 'small',
+      onClick: () => todoEx.data.items.pop()
+    })}
+  </div>
+</div>`;
+
+// css`` — injects a <style> element into <head> when interpolated inside html``
+const cssEx = html`<div class="wj-css-demo">
+  ${css`
+    .wj-css-demo {
+      background: linear-gradient(135deg,#eaddff 0%,#e8def8 100%);
+      border-radius: 12px; padding: 20px;
+      color: #21005d; font-weight: 500;
+    }
+  `}
+  Styled with <code>css&grave;...&grave;</code> &mdash; the
+  <code>&lt;style&gt;</code> is injected into <code>&lt;head&gt;</code> automatically.
+</div>`;
+
+// extend() — adds typed methods directly onto the html element
+const greetEx = html`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  Hello, <b>${text('name', 'World')}</b>!
+  ${Button({ label: 'Greet Alice', variant: 'outlined', size: 'small',
+    onClick: () => greetEx.greet('Alice \uD83D\uDC4B')
+  })}
+  ${Button({ label: 'Reset', variant: 'text', size: 'small',
+    onClick: () => greetEx.greet('World')
+  })}
+</div>`.extend(self => ({
+  greet(name) { self.data.name = name; }
+}));
+
+// onadd / onremove — fires when the element enters/leaves the document
+const lcLog = [];
+const lcOut = outEl('Events:', '\u2014');
+const trackedEl = html`<div class="tracked-el">I am being tracked</div>`
+  .onadd(() => { lcLog.push('added');   lcOut.data.val = lcLog.slice(-4).join(' \u2192 '); })
+  .onremove(() => { lcLog.push('removed'); lcOut.data.val = lcLog.slice(-4).join(' \u2192 '); });
+let lcInDom = false;
+const lcSlot = html`<div></div>`;
+const lcEx = html`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  ${Button({ label: 'Toggle in document', variant: 'outlined', size: 'small',
+    onClick: () => {
+      if (lcInDom) { trackedEl.remove(); }
+      else         { lcSlot.appendChild(trackedEl); } // needed so onadd fires
+      lcInDom = !lcInDom;
+    }
+  })}
+  ${lcSlot}
+</div>`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI Component examples — each preview uses the component directly
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Typography — all 12 variants
+const typoEx = html`<div style="display:flex;flex-direction:column;gap:4px">
+  ${['h1','h2','h3','h4','h5','h6'].map(v => Typography({ variant: v, children: v }))}
+  ${['subtitle1','subtitle2','body1','body2','caption','overline'].map(v =>
+    Typography({ variant: v, children: v })
+  )}
+</div>`;
+
+// Button — variants, sizes, states
+const btnOut = outEl('Clicks:', '0');
+let btnClicks = 0;
+const onBtnClick = () => { btnClicks++; btnOut.data.val = String(btnClicks); };
+const buttonEx = html`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+  ${Button({ label: 'Filled',   variant: 'filled',   onClick: onBtnClick })}
+  ${Button({ label: 'Outlined', variant: 'outlined', onClick: onBtnClick })}
+  ${Button({ label: 'Text',     variant: 'text',     onClick: onBtnClick })}
+  ${Button({ label: 'Elevated', variant: 'elevated', onClick: onBtnClick })}
+  ${Button({ label: 'Tonal',    variant: 'tonal',    onClick: onBtnClick })}
+  ${Button({ label: 'Small',    size: 'small',       onClick: onBtnClick })}
+  ${Button({ label: 'Large',    size: 'large',       onClick: onBtnClick })}
+  ${Button({ label: 'Disabled', disabled: true                           })}
+</div>`;
+
+// TextField — normal, error, disabled; getValue/setValue
+const tfOut = outEl('onChange value:', '(empty)');
+const textFieldEx = html`<div style="display:flex;flex-direction:column;gap:16px;max-width:400px">
+  ${TextField({ label: 'Normal field', fullWidth: true,
+    onChange: v => { tfOut.data.val = v || '(empty)'; }
+  })}
+  ${TextField({ label: 'With error', error: 'This field is required', fullWidth: true })}
+  ${TextField({ label: 'Disabled',   value: 'Cannot edit', disabled: true, fullWidth: true })}
+</div>`;
+
+// AppBar
+const appBarEx = html`<div style="display:flex;flex-direction:column;gap:16px">
+  ${AppBar({ title: 'Primary AppBar', color: 'primary', position: 'static',
+    actions: [Button({ label: 'Action', variant: 'text', size: 'small' })]
+  })}
+  ${AppBar({ title: 'Surface AppBar', color: 'surface', position: 'static',
+    actions: [Button({ label: 'Action', variant: 'outlined', size: 'small' })]
+  })}
+</div>`;
+
+// Card
+const cardEx = html`<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+  ${Card({ title: 'Elevated Card', subtitle: 'Subtitle text',
+    children: 'A card with title, subtitle, and a content slot.',
+    elevated: true
+  })}
+  ${Card({ title: 'Outlined Card',
+    children: 'Uses a 1 px border instead of elevation.',
+    outlined: true,
+    actions: [
+      Button({ label: 'Cancel', variant: 'text',   size: 'small' }),
+      Button({ label: 'OK',     variant: 'filled', size: 'small' }),
+    ]
+  })}
+</div>`;
+
+// Layout — Container / Stack / Row / Section
+const layoutEx = Container({ maxWidth: 'sm', children:
+  Stack({ direction: 'column', gap: 'sm', children: [
+    Typography({ variant: 'subtitle2',
+      children: 'Container \u2192 Stack(column) \u2192 Row(row) \u2192 Section' }),
+    Row({ gap: 'sm', children: [
+      html`<div style="flex:1;background:#eaddff;border-radius:8px;padding:16px;text-align:center;color:#21005d;font-weight:500">Col 1</div>`,
+      html`<div style="flex:1;background:#e8def8;border-radius:8px;padding:16px;text-align:center;color:#1d192b;font-weight:500">Col 2</div>`,
+      html`<div style="flex:1;background:#ffd8e4;border-radius:8px;padding:16px;text-align:center;color:#31111d;font-weight:500">Col 3</div>`,
+    ] }),
+    Section({ padding: 'md',
+      children: Typography({ variant: 'body2', children: 'Section with padding.' })
+    }),
+  ] })
+});
+
+// Chip
+const chipOut = outEl('Last action:', '\u2014');
+const chipEx = html`<div style="display:flex;gap:8px;flex-wrap:wrap">
+  ${Chip({ label: 'Default',
+    onClick: () => { chipOut.data.val = 'clicked: Default'; }
+  })}
+  ${Chip({ label: 'Outlined', variant: 'outlined',
+    onClick: () => { chipOut.data.val = 'clicked: Outlined'; }
+  })}
+  ${Chip({ label: 'Primary', color: 'primary',
+    onClick: () => { chipOut.data.val = 'clicked: Primary'; }
+  })}
+  ${Chip({ label: 'Deletable',
+    onClick:  () => { chipOut.data.val = 'clicked body'; },
+    onDelete: () => { chipOut.data.val = 'deleted!'; }
+  })}
+  ${Chip({ label: 'Disabled', disabled: true })}
+</div>`;
+
+// List / ListItem
+const listOut = outEl('Selected:', '\u2014');
+const listEx = List({ children: ['Inbox','Starred','Sent','Drafts'].map(label =>
+  ListItem({ primary: label, onClick: () => { listOut.data.val = label; } })
+) });
+
+// Divider
+const dividerEx = html`<div style="display:flex;flex-direction:column;gap:8px">
+  ${Typography({ variant: 'body2', children: 'fullWidth (default)' })}
+  ${Divider()}
+  ${Typography({ variant: 'body2', children: 'inset' })}
+  ${Divider({ variant: 'inset' })}
+  ${Typography({ variant: 'body2', children: 'middle' })}
+  ${Divider({ variant: 'middle' })}
+  ${Row({ align: 'center', gap: 'sm', children: [
+    Typography({ variant: 'body2', children: 'Left' }),
+    Divider({ orientation: 'vertical' }),
+    Typography({ variant: 'body2', children: 'vertical' }),
+    Divider({ orientation: 'vertical' }),
+    Typography({ variant: 'body2', children: 'Right' }),
+  ] })}
+</div>`;
+
+// Dialog — show/close/isOpen
+const dlgOut = outEl('Status:', 'closed');
+const dlg = Dialog({
+  title: 'Confirm Action',
+  children: 'Are you sure you want to proceed? This cannot be undone.',
+  onClose: () => { dlgOut.data.val = 'closed'; },
+  actions: [
+    Button({ label: 'Cancel',  variant: 'text',
+      onClick: () => { dlg.close(); dlgOut.data.val = 'cancelled'; }
+    }),
+    Button({ label: 'Confirm', variant: 'filled',
+      onClick: () => { dlg.close(); dlgOut.data.val = 'confirmed \u2713'; }
+    }),
+  ]
+});
+document.body.appendChild(dlg);   // Dialog must be in the document to show
+
+// Theming
+let isDark = false;
+const toggleBtn = Button({ label: '\u2600 Light', variant: 'tonal', size: 'small',
+  onClick: () => {
+    isDark = !isDark;
+    applyTheme(isDark ? darkTheme : lightTheme);
+    document.documentElement.classList.toggle('dark', isDark);
+    toggleBtn.textContent = isDark ? '\uD83C\uDF19 Dark' : '\u2600 Light';
+  }
+});
+
+const themingEx = html`<div style="display:flex;gap:8px;flex-wrap:wrap">
+  ${Button({ label: 'lightTheme', variant: 'filled',
+    onClick: () => {
+      applyTheme(lightTheme);
+      document.documentElement.classList.remove('dark');
+      isDark = false; toggleBtn.textContent = '\u2600 Light';
+    }
+  })}
+  ${Button({ label: 'darkTheme', variant: 'tonal',
+    onClick: () => {
+      applyTheme(darkTheme);
+      document.documentElement.classList.add('dark');
+      isDark = true; toggleBtn.textContent = '\uD83C\uDF19 Dark';
+    }
+  })}
+  ${Button({ label: 'createTheme(\u2026)', variant: 'outlined',
+    onClick: () => {
+      applyTheme(createTheme({ colors: { primary: '#005cbb', onPrimary: '#ffffff' } }));
+      document.documentElement.classList.remove('dark');
+      isDark = false; toggleBtn.textContent = '\u2600 Light';
+    }
+  })}
+</div>`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Assemble the page — html`` all the way down
+// ─────────────────────────────────────────────────────────────────────────────
+const page = html`<div>
+  ${AppBar({ title: 'wirejs-dom \u2014 Component Showcase', color: 'primary',
+    position: 'sticky', actions: [toggleBtn]
+  })}
+  <div class="app-main">
+
+    <section class="showcase-section">
+      <h2>v2 Primitives</h2>
+
+      ${demoCard(htmlEx,
+`import { html } from 'wirejs-dom/v2';
+
+const note = html\`<div>Hello from <b>wirejs-dom</b>!</div>\`;
+document.body.appendChild(note);`
+      )}
+
+      ${columnCard(counterEx,
+`// text() creates a reactive text node.
+// Read or write the value through .data.<key>.
+const el = html\`<div>
+  Count: <strong>\${text('n', '0')}</strong>
+  \${myButton}
+</div>\`;
+
+el.data.n;       // → current value (string)
+el.data.n = '5'; // → DOM updates immediately`,
+        counterOut
+      )}
+
+      ${demoCard(idEx,
+`// id() extracts a DOM node as a named data property.
+// Assigning a new node to .data.<key> replaces it in the DOM.
+const el = html\`<div>
+  <span \${id('badge')}>original</span>
+</div>\`;
+
+el.data.badge;               // → the <span> element
+el.data.badge = newSpanNode; // → swaps it in the DOM`
+      )}
+
+      ${demoCard(attrEx,
+`// attribute() creates a reactive binding for a DOM attribute.
+// On input[value], wirejs-dom auto-syncs .data.<key> on every keystroke.
+let el;
+el = html\`<div>
+  <input value=\${attribute('val', 'hello')} />
+</div>\`;
+
+el.data.val;          // → current input value (live)
+el.data.val = 'new';  // → sets the input's value`,
+        attrOut
+      )}
+
+      ${demoCard(todoEx,
+`// list() renders a mapped array and keeps the DOM in sync.
+// Standard Array mutations (push, pop, splice…) are reactive.
+const app = html\`<div>
+  <ul>\${list('items', t => html\`<li>\${t}</li>\`, ['buy groceries'])}</ul>
+  <input value=\${attribute('newItem', '')} />
+  <button onclick=\${() => {
+    app.data.items.push(app.data.newItem);
+    app.data.newItem = '';
+  }}>Add</button>
+</div>\`;
+
+app.data.items.push('walk the dog'); // → new <li> appears
+app.data.items.pop();                // → last <li> removed`
+      )}
+
+      ${demoCard(cssEx,
+`// css\`\` creates a <style> element.
+// When interpolated inside html\`\`, it is moved to <head> automatically.
+const el = html\`<div class="box">
+  \${css\`.box { background: purple; padding: 16px; }\`}
+  Styled element
+</div>\`;
+// No manual <style> injection needed.`
+      )}
+
+      ${demoCard(greetEx,
+`// extend() merges custom methods (and properties) onto the html element.
+const el = html\`<div>
+  Hello, <b>\${text('name', 'World')}</b>!
+</div>\`.extend(self => ({
+  greet(name) { self.data.name = name; }
+}));
+
+el.greet('Alice'); // → DOM reads "Hello, Alice!"`
+      )}
+
+      ${columnCard(lcEx,
+`// onadd / onremove fire when the element enters or leaves the document.
+const el = html\`<div>tracked</div>\`
+  .onadd(self   => console.log('added',   self))
+  .onremove(self => console.log('removed', self));
+
+document.body.appendChild(el); // → onadd fires
+el.remove();                    // → onremove fires`,
+        lcOut
+      )}
+    </section>
+
+    <section class="showcase-section">
+      <h2>UI Components</h2>
+
+      ${columnCard(typoEx,
+`import { Typography } from 'wirejs-dom/ui';
+
+Typography({ variant: 'h1',       children: 'Heading 1'  })
+Typography({ variant: 'h4',       children: 'Heading 4'  })
+Typography({ variant: 'body1',    children: 'Body text', gutterBottom: true })
+Typography({ variant: 'caption',  children: 'Caption',   color: '#888' })
+Typography({ variant: 'overline', children: 'OVERLINE'   })`
+      )}
+
+      ${demoCard(buttonEx,
+`import { Button } from 'wirejs-dom/ui';
+
+// variants
+Button({ label: 'Filled',   variant: 'filled'   })
+Button({ label: 'Outlined', variant: 'outlined' })
+Button({ label: 'Text',     variant: 'text'     })
+Button({ label: 'Elevated', variant: 'elevated' })
+Button({ label: 'Tonal',    variant: 'tonal'    })
+// sizes
+Button({ label: 'Small',    size: 'small'       })
+Button({ label: 'Large',    size: 'large'       })
+// states
+Button({ label: 'Disabled', disabled: true      })`,
+        btnOut
+      )}
+
+      ${columnCard(textFieldEx,
+`import { TextField } from 'wirejs-dom/ui';
+
+TextField({ label: 'Normal field', onChange: v => console.log(v) })
+TextField({ label: 'With error',   error: 'This field is required' })
+TextField({ label: 'Disabled',     disabled: true })
+
+// programmatic access
+const tf = TextField({ label: 'Name' });
+tf.getValue();        // → current value
+tf.setValue('hello'); // → sets the input`,
+        tfOut
+      )}
+
+      ${columnCard(appBarEx,
+`import { AppBar } from 'wirejs-dom/ui';
+
+AppBar({ title: 'My App', color: 'primary', position: 'sticky',
+  actions: [Button({ label: 'Menu', variant: 'text' })]
+})
+AppBar({ title: 'Surface', color: 'surface' })`
+      )}
+
+      ${demoCard(cardEx,
+`import { Card } from 'wirejs-dom/ui';
+
+Card({
+  title: 'Card Title', subtitle: 'Subtitle',
+  children: 'Content goes here.',
+  elevated: true,
+  actions: [Button({ label: 'Cancel', variant: 'text' }),
+            Button({ label: 'OK',     variant: 'filled' })],
+})
+Card({ children: 'Outlined card', outlined: true })`
+      )}
+
+      ${demoCard(layoutEx,
+`import { Container, Stack, Row, Section } from 'wirejs-dom/ui';
+
+Container({ maxWidth: 'sm', children:
+  Stack({ direction: 'column', gap: 'sm', children: [
+    Row({ gap: 'sm', children: [colA, colB, colC] }),
+    Section({ padding: 'md', children: content }),
+  ] })
+})`
+      )}
+
+      ${demoCard(chipEx,
+`import { Chip } from 'wirejs-dom/ui';
+
+Chip({ label: 'Default',   onClick:  () => {} })
+Chip({ label: 'Outlined',  variant:  'outlined' })
+Chip({ label: 'Primary',   color:    'primary' })
+Chip({ label: 'Deletable', onDelete: () => {} })
+Chip({ label: 'Disabled',  disabled: true })`,
+        chipOut
+      )}
+
+      ${demoCard(listEx,
+`import { List, ListItem } from 'wirejs-dom/ui';
+
+List({ children: [
+  ListItem({ primary: 'Inbox',   onClick: () => {} }),
+  ListItem({ primary: 'Starred', secondary: 'No new items',
+             leading: avatarNode }),
+  ListItem({ primary: 'Drafts',  disabled: true }),
+] })`,
+        listOut
+      )}
+
+      ${columnCard(dividerEx,
+`import { Divider } from 'wirejs-dom/ui';
+
+Divider()                          // fullWidth horizontal (default)
+Divider({ variant: 'inset'   })    // inset
+Divider({ variant: 'middle'  })    // middle
+Divider({ orientation: 'vertical' }) // vertical`
+      )}
+
+      ${demoCard(
+        Button({ label: 'Open Dialog', variant: 'filled',
+          onClick: () => { dlg.show(); dlgOut.data.val = 'open'; }
+        }),
+`import { Dialog } from 'wirejs-dom/ui';
+
+const dlg = Dialog({
+  title: 'Confirm Action',
+  children: 'Are you sure?',
+  onClose: () => console.log('closed'),
+  actions: [
+    Button({ label: 'Cancel',  variant: 'text',
+             onClick: () => dlg.close() }),
+    Button({ label: 'Confirm', variant: 'filled',
+             onClick: () => dlg.close() }),
+  ]
+});
+document.body.appendChild(dlg);
+
+dlg.show();    // open
+dlg.close();   // close
+dlg.isOpen();  // → boolean`,
+        dlgOut
+      )}
+    </section>
+
+    <section class="showcase-section">
+      <h2>Theming</h2>
+      ${demoCard(themingEx,
+`import { applyTheme, lightTheme, darkTheme, createTheme }
+  from 'wirejs-dom/ui';
+
+// preset themes — sets --wj-* CSS custom properties on <html>
+applyTheme(lightTheme);
+applyTheme(darkTheme);
+
+// deep-merge custom overrides into lightTheme
+applyTheme(createTheme({
+  colors: { primary: '#005cbb', onPrimary: '#ffffff' }
+}));`
+      )}
+    </section>
+
+  </div>
+</div>`;
+
+document.body.appendChild(page);
+</script>
+</body>
+</html>
