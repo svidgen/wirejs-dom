@@ -48,7 +48,7 @@ QUnit.module('ui > Dialog', hooks => {
     QUnit.test('onClose callback fires when close event dispatched', assert => {
         let closed = false;
         const dlg = Dialog({ onClose: () => { closed = true; } });
-        dlg.dispatchEvent(new Event('close'));
+        dlg.dispatchEvent(new window.Event('close'));
         assert.true(closed, 'onClose was called');
     });
 });

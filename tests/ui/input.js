@@ -39,7 +39,7 @@ QUnit.module('ui > TextField', hooks => {
         const field = TextField({ onChange: v => { changed = v; } });
         const input = field.querySelector('input');
         input.value = 'new';
-        input.dispatchEvent(new Event('change'));
+        input.dispatchEvent(new window.Event('change'));
         assert.equal(changed, 'new');
     });
     QUnit.test('onInput callback fires on input event', assert => {
@@ -47,7 +47,7 @@ QUnit.module('ui > TextField', hooks => {
         const field = TextField({ onInput: v => { inputted = v; } });
         const input = field.querySelector('input');
         input.value = 'typing';
-        input.dispatchEvent(new Event('input'));
+        input.dispatchEvent(new window.Event('input'));
         assert.equal(inputted, 'typing');
     });
     QUnit.test('disabled input is disabled', assert => {

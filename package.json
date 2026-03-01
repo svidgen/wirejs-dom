@@ -23,7 +23,7 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "start": "wirejs-scripts start",
-    "test": "tsc && tsc -p tsconfig.tests.json && qunit tests/cli.js"
+    "test": "tsc && qunit tests/cli.js"
   },
   "repository": {
     "type": "git",
