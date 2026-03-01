@@ -2,3 +2,5 @@ node_modules
 *.swp
 www/*.js
 lib/v2
+lib/ui
+tests/src
