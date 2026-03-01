@@ -9,6 +9,10 @@
     "./v2": {
       "types": "./lib/v2/index.d.ts",
       "default": "./lib/v2/index.js"
+    },
+    "./ui": {
+      "types": "./lib/ui/index.d.ts",
+      "default": "./lib/ui/index.js"
     }
   },
   "directories": {
@@ -19,7 +23,7 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "start": "wirejs-scripts start",
-    "test": "qunit tests/cli.js"
+    "test": "tsc && tsc -p tsconfig.tests.json && qunit tests/cli.js"
   },
   "repository": {
     "type": "git",
